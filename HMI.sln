@@ -5,11 +5,6 @@ VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMI", "HMI\HMI.csproj", "{B1993049-6858-421A-9884-8F8331FEF6BC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resources", "resources", "{C1F884F9-B0E3-4914-9A11-BA7CC2A65679}"
-	ProjectSection(SolutionItems) = preProject
-		C:\Users\tisco\Desktop\GerarchiaSistemaOAMD.xml = C:\Users\tisco\Desktop\GerarchiaSistemaOAMD.xml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

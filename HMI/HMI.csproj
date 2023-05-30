@@ -7,4 +7,14 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="resources\GerarchiaSistemaOAMD.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="resources\GerarchiaSistemaOAMD.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
