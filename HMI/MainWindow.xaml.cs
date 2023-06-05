@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Prova
 {
@@ -47,6 +50,8 @@ namespace Prova
             addTreeNode(xDoc.DocumentElement, tNode);
 
 
+
+
         }
 
         //This function is called recursively until all nodes are loaded
@@ -69,8 +74,6 @@ namespace Prova
 
                     tNode = treeNode.Items[x] as TreeViewItem;
                     addTreeNode(xNode, tNode);
-
-
                 }
 
             }
@@ -79,12 +82,50 @@ namespace Prova
 
         }
 
+        private void tv_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            TreeView treeView;
+            TreeViewItem item;
+            if (sender != null)
+            {
+                Wrap.Children.Clear();
+                treeView = (TreeView)(sender);
 
+                item = (TreeViewItem)(treeView.SelectedItem);
+                if (item != null)
+                {
+                    if (item.Items.Count == 0)
+                    {
+                        addToDocPanel(item.Header);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < item.Items.Count; i++)
+                        {
+                            TreeViewItem tvItem = (TreeViewItem)item.Items[i];
+                            addToDocPanel(tvItem.Header);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void addToDocPanel(object header)
+        {
+            Button mybutton = new Button();
+            mybutton.Content = header;
+            mybutton.Margin = new Thickness(10, 20, 10, 20);
+            mybutton.MinHeight = 30;
+
+            Wrap.Children.Add(mybutton);
+        }
 
 
 
 
     }
+
+
 }
 
 
