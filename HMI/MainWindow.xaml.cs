@@ -70,6 +70,8 @@ namespace Prova
 
                     TreeViewItem nuovoNodo = new TreeViewItem();
                     nuovoNodo.Header = xNode.Attributes["SBC"].Value;
+                    nuovoNodo.Tag = xNode.Attributes["status"].Value;
+                    
                     treeNode.Items.Add(nuovoNodo);
 
                     tNode = treeNode.Items[x] as TreeViewItem;
@@ -96,45 +98,37 @@ namespace Prova
                 {
                     if (item.Items.Count == 0)
                     {
-                        addToDocPanel(item.Header);
+                        addToDocPanel(item.Header, item.Tag);
                     }
                     else
                     {
                         for (int i = 0; i < item.Items.Count; i++)
                         {
                             TreeViewItem tvItem = (TreeViewItem)item.Items[i];
-                            addToDocPanel(tvItem.Header);
+                            addToDocPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
                 }
             }
         }
 
-        private void addToDocPanel(object header)
+        private void addToDocPanel(object header, object tag)
         {
             Button mybutton = new Button();
             mybutton.Content = header;
             mybutton.Margin = new Thickness(10, 20, 10, 20);
             mybutton.MinHeight = 30;
-
+            if ((string)tag == "1")
+            {
+                mybutton.Background = Brushes.Green;
+            } else if ((string)tag == "0")
+            {
+                mybutton.Background = Brushes.Red;
+            } else
+            {
+                mybutton.Background = Brushes.White;
+            }
             Wrap.Children.Add(mybutton);
         }
-
-
-
-
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-

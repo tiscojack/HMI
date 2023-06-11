@@ -6,17 +6,14 @@
     xmlns:local="clr-namespace:Prova"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="MainWindow"
-    Width="1000"
-    Height="750"
+    SizeToContent="Manual"
+    WindowState="Maximized"
     mc:Ignorable="d">
 
     <Grid>
 
-        <DockPanel LastChildFill="False">
-            <DockPanel
-                x:Name="leftDocPanel"
-                Width="200"
-                LastChildFill="False">
+        <DockPanel>
+            <DockPanel x:Name="leftDocPanel" Grid.Column="0">
                 <TreeView
                     Name="dirTree"
                     HorizontalAlignment="Stretch"
@@ -33,15 +30,14 @@
                     </TreeView.ItemContainerStyle>
                 </TreeView>
             </DockPanel>
-            <DockPanel
-                x:Name="rightDocPanel"
-                Width="785"
-                LastChildFill="False">
+            <GridSplitter
+                Grid.Column="1"
+                Width="5"
+                HorizontalAlignment="Stretch" />
+            <DockPanel x:Name="rightDocPanel">
                 <DockPanel
                     x:Name="DocPanel"
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Width="785"
+                    Grid.Column="2"
                     Background="#00A3CC"
                     LastChildFill="True">
                     <WrapPanel
