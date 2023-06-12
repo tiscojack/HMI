@@ -23,7 +23,7 @@
         <DockPanel x:Name="leftDocPanel" Grid.Row="1">
             <Menu DockPanel.Dock="Top" Grid.Row="0">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Demo" Click="demo_Click" />
+                    <MenuItem Header="_Demo" Click="Demo_Click" />
                     <MenuItem Header="_Open" />
                     <MenuItem Header="_Save" />
                     <Separator />
@@ -32,12 +32,12 @@
             </Menu>
             <ScrollViewer>
                 <StackPanel>
-                <TextBox x:Name="txtSearch" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" MinWidth="200" TextChanged="txtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
+                <TextBox x:Name="txtSearch" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" MinWidth="200" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
                 <TreeView
                     Name="dirTree"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    MouseUp="tv_MouseUp"
+                    MouseUp="Tv_MouseUp"
                     VirtualizingStackPanel.IsVirtualizing="False"
                     VirtualizingStackPanel.VirtualizationMode="Standard">
 

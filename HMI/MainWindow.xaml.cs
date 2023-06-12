@@ -28,7 +28,7 @@ namespace Prova
     public partial class MainWindow : Window
     {
         bool demo = false;
-        string[]  status =
+        readonly string[] status =
         {
             "OPERATIVE",
             "NOT_OPERATIVE",
@@ -43,31 +43,33 @@ namespace Prova
 
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += timer_Tick;
+            timer.Tick += Timer_Tick;
             timer.Start();
 
             //First, we'll load the Xml document
-            XmlDocument xDoc = new XmlDocument();
+            XmlDocument xDoc = new();
             xDoc.Load(@"resources/albero_configurazione.xml");
 
             //Now, clear out the treeview, 
             dirTree.Items.Clear();
 
             //and add the first (root) node
-            TreeViewItem treeviewItemRoot = new TreeViewItem();
-            treeviewItemRoot.Header = "FREMM";
+            TreeViewItem treeviewItemRoot = new()
+            {
+                Header = "FREMM"
+            };
             dirTree.Items.Add(treeviewItemRoot);
 
-            TreeViewItem tNode = new TreeViewItem();
+            TreeViewItem tNode = new();
             tNode = (TreeViewItem)dirTree.Items[0];
 
             //We make a call to addTreeNode, 
             //where we'll add all of our nodes
-            addTreeNode(xDoc.DocumentElement, tNode);
+            AddTreeNode(xDoc.DocumentElement, tNode);
 
         }
 
-        void timer_Tick(object sender, EventArgs e)
+        void Timer_Tick(object sender, EventArgs e)
         {
             XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
@@ -110,13 +112,13 @@ namespace Prova
         }
 
 
-        private void demo_Click(object sender, RoutedEventArgs e)
+        private void Demo_Click(object sender, RoutedEventArgs e)
         {
             demo = true;
 
         }
         //This function is called recursively until all nodes are loaded
-        private void addTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
+        private void AddTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
         {
             XmlNode xNode;
             TreeViewItem tNode;
@@ -136,49 +138,47 @@ namespace Prova
                     treeNode.Items.Add(nuovoNodo);
 
                     tNode = treeNode.Items[x] as TreeViewItem;
-                    addTreeNode(xNode, tNode);
+                    AddTreeNode(xNode, tNode);
                 }
-
             }
-            //else //No children, so add the outer xml (trimming off whitespace)
-            //   treeNode.Header = xmlNode.OuterXml.Trim();
-
         }
 
-        private void tv_MouseUp(object sender, MouseButtonEventArgs e)
+        private void Tv_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TreeView treeView;
             TreeViewItem item;
             if (sender != null)
             {
                 Wrap.Children.Clear();
-                treeView = (TreeView)(sender);
+                treeView = (TreeView)sender;
 
                 item = (TreeViewItem)(treeView.SelectedItem);
                 if (item != null)
                 {
                     if (item.Items.Count == 0)
                     {
-                        addToDocPanel(item.Header, item.Tag);
+                        AddToDocPanel(item.Header, item.Tag);
                     }
                     else
                     {
                         for (int i = 0; i < item.Items.Count; i++)
                         {
                             TreeViewItem tvItem = (TreeViewItem)item.Items[i];
-                            addToDocPanel(tvItem.Header, tvItem.Tag);
+                            AddToDocPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
                 }
             }
         }
 
-        private void addToDocPanel(object header, object tag)
+        private void AddToDocPanel(object header, object tag)
         {
-            Button mybutton = new Button();
-            mybutton.Content = header;
-            mybutton.Margin = new Thickness(10, 20, 10, 20);
-            mybutton.MinHeight = 30;
+            Button mybutton = new()
+            {
+                Content = header,
+                Margin = new Thickness(10, 20, 10, 20),
+                MinHeight = 30
+            };
 
             XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
@@ -199,39 +199,39 @@ namespace Prova
             {
                 mybutton.Background = Brushes.White;
             }
-            ToolTip tooltip = new ToolTip();
-            tooltip.Content = (string)tag;
+            ToolTip tooltip = new()
+            {
+                Content = (string)tag
+            };
             mybutton.ToolTip = tooltip;
             Wrap.Children.Add(mybutton);
         }
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (dirTree.Items.Count > 0)
             {
                 for (int i = 0; i < dirTree.Items.Count; i++)
                 {
-                    expandTreeItem((TreeViewItem)dirTree.Items[i]);
+                    ExpandTreeItem((TreeViewItem)dirTree.Items[i]);
                 }
             }
         }
 
-        private void expandTreeItem(TreeViewItem item)
+        private void ExpandTreeItem(TreeViewItem item)
         {
-            string text;
-
-            
+            string text;          
             item.Foreground = Brushes.Black;
             item.SetValue(TreeViewItem.IsExpandedProperty, true);
             text = txtSearch.Text.ToLower();
-            string sItem = (string)(item.Header);
+            string sItem = (string)item.Header;
             if (!text.Equals(string.Empty) && sItem.ToLower().Contains(text))
             {
                 item.Foreground = Brushes.Red;
             }
             for (int i = 0; i < item.Items.Count; i++)
             {
-                expandTreeItem((TreeViewItem)item.Items[i]);
+                ExpandTreeItem((TreeViewItem)item.Items[i]);
             }
         }
     }
