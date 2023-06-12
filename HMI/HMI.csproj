@@ -8,10 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="resources\alberoFREMM_GP_ASW_Completo.xml" />
     <None Remove="resources\GerarchiaSistemaOAMD.xml" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="resources\alberoFREMM_GP_ASW_Completo.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="resources\GerarchiaSistemaOAMD.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
