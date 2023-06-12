@@ -1,6 +1,6 @@
 <FREMM>
 	<child sys="COMBAT_SYSTEM" SBC="FREMM_F4" status="0">
-		<child sys="CMS" SBC="41211_S" status="0">
+		<child sys="CMS" SBC="41211_S" status="1">
 			<child sys="MFC_1" SBC="41211_S11" status="0"/>
 			<child sys="MFC_2" SBC="41211_S12" status="0"/>
 			<child sys="MFC_3" SBC="41211_S13" status="0"/>

@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.Xml;
 using static System.Net.Mime.MediaTypeNames;
 using System.Xml.Linq;
+using System.Windows.Threading;
 
 namespace Prova
 {
@@ -30,6 +31,10 @@ namespace Prova
 
             InitializeComponent();
 
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += timer_Tick;
+            timer.Start();
 
             //First, we'll load the Xml document
             XmlDocument xDoc = new XmlDocument();
@@ -50,10 +55,36 @@ namespace Prova
             //where we'll add all of our nodes
             addTreeNode(xDoc.DocumentElement, tNode);
 
-
-
-
         }
+
+        void timer_Tick(object sender, EventArgs e)
+        {
+            foreach (Button mybutton in Wrap.Children){
+
+                XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+
+                IEnumerable<XElement> matches = xDoc.Root
+                      .Descendants("child")
+                      .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
+
+                if (matches.Any() == false) return;
+                string status = (string)matches.First().Attribute("status").Value;
+
+                if (status == "1")
+                {
+                    mybutton.Background = Brushes.Green;
+                }
+                else if (status == "0")
+                {
+                    mybutton.Background = Brushes.Red;
+                }
+                else
+                {
+                    mybutton.Background = Brushes.White;
+                }
+
+            }
+    }
 
         //This function is called recursively until all nodes are loaded
         private void addTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
@@ -120,7 +151,7 @@ namespace Prova
             mybutton.Margin = new Thickness(10, 20, 10, 20);
             mybutton.MinHeight = 30;
 
-            XDocument xDoc = XDocument.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
             IEnumerable<XElement> matches = xDoc.Root
                       .Descendants("child")
