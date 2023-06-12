@@ -120,27 +120,25 @@ namespace Prova
             mybutton.Margin = new Thickness(10, 20, 10, 20);
             mybutton.MinHeight = 30;
 
-            XmlDocument xDoc = new XmlDocument();
-           // xDoc.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
 
-            XElement root = XElement.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
-            IEnumerable<XElement> address =
-                from el in root.Elements("child")
-                where (string)el.Attribute("SBC") == (string)tag
-                select el;
-            foreach (XElement el in address)
-                Console.WriteLine(el);
+            IEnumerable<XElement> matches = xDoc.Root
+                      .Descendants("child")
+                      .Where(el => (string)el.Attribute("SBC") == (string)tag);
 
-            /*if (placeholder == "1")
+            string status = (string)matches.First().Attribute("status").Value;
+          
+
+            if (status == "1")
             {
                 mybutton.Background = Brushes.Green;
-            } else if (placeholder == "0")
+            } else if (status == "0")
             {
                 mybutton.Background = Brushes.Red;
             } else
             {
                 mybutton.Background = Brushes.White;
-            }*/
+            }
             ToolTip tooltip = new ToolTip();
             tooltip.Content = (string)tag;
             mybutton.ToolTip = tooltip;
