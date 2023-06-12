@@ -23,7 +23,7 @@
         <DockPanel x:Name="leftDocPanel" Grid.Row="1">
             <Menu DockPanel.Dock="Top" Grid.Row="0">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_demo" Click="demo_Click" />
+                    <MenuItem Header="_Demo" Click="demo_Click" />
                     <MenuItem Header="_Open" />
                     <MenuItem Header="_Save" />
                     <Separator />

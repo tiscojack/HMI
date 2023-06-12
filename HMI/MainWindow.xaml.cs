@@ -28,6 +28,14 @@ namespace Prova
     public partial class MainWindow : Window
     {
         bool demo = false;
+        string[]  status =
+        {
+            "OPERATIVE",
+            "NOT_OPERATIVE",
+            "MAINTENANCE",
+            "SHUTDOWN",
+            "FAILURE"};
+
         public MainWindow()
         {
 
@@ -72,6 +80,7 @@ namespace Prova
                     Random rand = new Random();
                     int _salt = rand.Next();
                     el.Attribute("status").Value = (_salt % 2).ToString();
+                    el.Attribute("status1").Value = (string)status[_salt % 5];
                 }
                 xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             }
