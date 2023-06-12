@@ -18,6 +18,9 @@
         </Grid.ColumnDefinitions>
         
             <DockPanel x:Name="leftDocPanel">
+            <ScrollViewer>
+                <StackPanel>
+                <TextBox x:Name="txtSearch" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" MinWidth="200" TextChanged="txtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
                 <TreeView
                     Name="dirTree"
                     HorizontalAlignment="Stretch"
@@ -33,7 +36,10 @@
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
-            </DockPanel>
+            
+            </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
             <GridSplitter
                 Grid.Column="1"
                 Width="5"

@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using static System.Net.Mime.MediaTypeNames;
+using System.Xml.Linq;
 
 namespace Prova
 {
@@ -32,7 +33,7 @@ namespace Prova
 
             //First, we'll load the Xml document
             XmlDocument xDoc = new XmlDocument();
-            xDoc.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
+            xDoc.Load(@"resources/albero_configurazione.xml");
 
             //Now, clear out the treeview, 
             dirTree.Items.Clear();
@@ -70,11 +71,7 @@ namespace Prova
 
                     TreeViewItem nuovoNodo = new TreeViewItem();
                     nuovoNodo.Header = xNode.Attributes["sys"].Value;
-                    string[] roba;
-                    roba = new string[2] {"", ""};
-                    roba[0] = (string)xNode.Attributes["status"].Value;
-                    roba[1] = (string)xNode.Attributes["SBC"].Value;
-                    nuovoNodo.Tag = roba;
+                    nuovoNodo.Tag = (string)xNode.Attributes["SBC"].Value;
                     
                     treeNode.Items.Add(nuovoNodo);
 
@@ -102,40 +99,82 @@ namespace Prova
                 {
                     if (item.Items.Count == 0)
                     {
-                        addToDocPanel(item.Header, (string[])item.Tag);
+                        addToDocPanel(item.Header, item.Tag);
                     }
                     else
                     {
                         for (int i = 0; i < item.Items.Count; i++)
                         {
                             TreeViewItem tvItem = (TreeViewItem)item.Items[i];
-                            addToDocPanel(tvItem.Header, (string[])tvItem.Tag);
+                            addToDocPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
                 }
             }
         }
 
-        private void addToDocPanel(object header, string[] tag)
+        private void addToDocPanel(object header, object tag)
         {
             Button mybutton = new Button();
             mybutton.Content = header;
             mybutton.Margin = new Thickness(10, 20, 10, 20);
             mybutton.MinHeight = 30;
-            if ((string)tag[0] == "1")
+
+            XmlDocument xDoc = new XmlDocument();
+           // xDoc.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
+
+            XElement root = XElement.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
+            IEnumerable<XElement> address =
+                from el in root.Elements("child")
+                where (string)el.Attribute("SBC") == (string)tag
+                select el;
+            foreach (XElement el in address)
+                Console.WriteLine(el);
+
+            /*if (placeholder == "1")
             {
                 mybutton.Background = Brushes.Green;
-            } else if ((string)tag[0] == "0")
+            } else if (placeholder == "0")
             {
                 mybutton.Background = Brushes.Red;
             } else
             {
                 mybutton.Background = Brushes.White;
-            }
+            }*/
             ToolTip tooltip = new ToolTip();
-            tooltip.Content = (string)tag[1];
+            tooltip.Content = (string)tag;
             mybutton.ToolTip = tooltip;
             Wrap.Children.Add(mybutton);
+        }
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (dirTree.Items.Count > 0)
+            {
+                for (int i = 0; i < dirTree.Items.Count; i++)
+                {
+                    expandTreeItem((TreeViewItem)dirTree.Items[i]);
+                }
+            }
+        }
+
+        private void expandTreeItem(TreeViewItem item)
+        {
+            string text;
+
+            
+            item.Foreground = Brushes.Black;
+            item.SetValue(TreeViewItem.IsExpandedProperty, true);
+            text = txtSearch.Text.ToLower();
+            string sItem = (string)(item.Header);
+            if (!text.Equals(string.Empty) && sItem.ToLower().Contains(text))
+            {
+                item.Foreground = Brushes.Red;
+            }
+            for (int i = 0; i < item.Items.Count; i++)
+            {
+                expandTreeItem((TreeViewItem)item.Items[i]);
+            }
         }
     }
 }
