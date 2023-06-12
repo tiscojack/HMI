@@ -103,7 +103,7 @@ namespace Prova
 
         private void demo_Click(object sender, RoutedEventArgs e)
         {
-            macro = true;
+            demo = true;
 
         }
         //This function is called recursively until all nodes are loaded
