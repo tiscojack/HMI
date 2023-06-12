@@ -11,13 +11,25 @@
     mc:Ignorable="d">
 
     <Grid>
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" MinWidth="150" MaxWidth="800"/>
             <ColumnDefinition Width="5" />
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
+
         
-            <DockPanel x:Name="leftDocPanel">
+        <DockPanel x:Name="leftDocPanel" Grid.Row="1">
+            <Menu DockPanel.Dock="Top" Grid.Row="0">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_demo" Click="demo_Click" />
+                    <MenuItem Header="_Open" />
+                    <MenuItem Header="_Save" />
+                    <Separator />
+                    <MenuItem Header="_Exit" />
+                </MenuItem>
+            </Menu>
             <ScrollViewer>
                 <StackPanel>
                 <TextBox x:Name="txtSearch" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" MinWidth="200" TextChanged="txtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
@@ -42,9 +54,10 @@
         </DockPanel>
             <GridSplitter
                 Grid.Column="1"
+                Grid.Row="1"
                 Width="5"
                 HorizontalAlignment="Stretch" />
-            <DockPanel x:Name="rightDocPanel" Grid.Column="2">
+        <DockPanel x:Name="rightDocPanel" Grid.Column="2" Grid.Row="1">
             <ScrollViewer>
                 <DockPanel
                     x:Name="DocPanel"

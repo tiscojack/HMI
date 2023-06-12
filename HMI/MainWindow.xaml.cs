@@ -21,11 +21,13 @@ using System.Windows.Threading;
 
 namespace Prova
 {
+    
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        bool demo = false;
         public MainWindow()
         {
 
@@ -59,10 +61,22 @@ namespace Prova
 
         void timer_Tick(object sender, EventArgs e)
         {
+            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+
+            if (demo)
+            {
+                IEnumerable<XElement> matches = xDoc.Root
+                      .Descendants("child");
+                foreach (XElement el in matches)
+                {
+                    Random rand = new Random();
+                    int _salt = rand.Next();
+                    el.Attribute("status").Value = (_salt % 2).ToString();
+                }
+                xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+            }
+
             foreach (Button mybutton in Wrap.Children){
-
-                XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
-
                 IEnumerable<XElement> matches = xDoc.Root
                       .Descendants("child")
                       .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
@@ -84,8 +98,14 @@ namespace Prova
                 }
 
             }
-    }
+        }
 
+
+        private void demo_Click(object sender, RoutedEventArgs e)
+        {
+            macro = true;
+
+        }
         //This function is called recursively until all nodes are loaded
         private void addTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
         {
