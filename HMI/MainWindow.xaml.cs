@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -32,14 +32,14 @@ namespace Prova
 
             //First, we'll load the Xml document
             XmlDocument xDoc = new XmlDocument();
-            xDoc.Load(@"resources/GerarchiaSistemaOAMD.xml");
+            xDoc.Load(@"resources/alberoFREMM_GP_ASW_Completo.xml");
 
             //Now, clear out the treeview, 
             dirTree.Items.Clear();
 
             //and add the first (root) node
             TreeViewItem treeviewItemRoot = new TreeViewItem();
-            treeviewItemRoot.Header = "Root";
+            treeviewItemRoot.Header = "FREMM";
             dirTree.Items.Add(treeviewItemRoot);
 
             TreeViewItem tNode = new TreeViewItem();
@@ -69,8 +69,12 @@ namespace Prova
                     xNode = xmlNode.ChildNodes[x];
 
                     TreeViewItem nuovoNodo = new TreeViewItem();
-                    nuovoNodo.Header = xNode.Attributes["SBC"].Value;
-                    nuovoNodo.Tag = xNode.Attributes["status"].Value;
+                    nuovoNodo.Header = xNode.Attributes["sys"].Value;
+                    string[] roba;
+                    roba = new string[2] {"", ""};
+                    roba[0] = (string)xNode.Attributes["status"].Value;
+                    roba[1] = (string)xNode.Attributes["SBC"].Value;
+                    nuovoNodo.Tag = roba;
                     
                     treeNode.Items.Add(nuovoNodo);
 
@@ -98,36 +102,39 @@ namespace Prova
                 {
                     if (item.Items.Count == 0)
                     {
-                        addToDocPanel(item.Header, item.Tag);
+                        addToDocPanel(item.Header, (string[])item.Tag);
                     }
                     else
                     {
                         for (int i = 0; i < item.Items.Count; i++)
                         {
                             TreeViewItem tvItem = (TreeViewItem)item.Items[i];
-                            addToDocPanel(tvItem.Header, tvItem.Tag);
+                            addToDocPanel(tvItem.Header, (string[])tvItem.Tag);
                         }
                     }
                 }
             }
         }
 
-        private void addToDocPanel(object header, object tag)
+        private void addToDocPanel(object header, string[] tag)
         {
             Button mybutton = new Button();
             mybutton.Content = header;
             mybutton.Margin = new Thickness(10, 20, 10, 20);
             mybutton.MinHeight = 30;
-            if ((string)tag == "1")
+            if ((string)tag[0] == "1")
             {
                 mybutton.Background = Brushes.Green;
-            } else if ((string)tag == "0")
+            } else if ((string)tag[0] == "0")
             {
                 mybutton.Background = Brushes.Red;
             } else
             {
                 mybutton.Background = Brushes.White;
             }
+            ToolTip tooltip = new ToolTip();
+            tooltip.Content = (string)tag[1];
+            mybutton.ToolTip = tooltip;
             Wrap.Children.Add(mybutton);
         }
     }
