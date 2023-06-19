@@ -18,10 +18,56 @@ using System.Xml;
 using static System.Net.Mime.MediaTypeNames;
 using System.Xml.Linq;
 using System.Windows.Threading;
+using System.Windows.Controls.Primitives;
+using Microsoft.Xaml.Behaviors;
 
 namespace Prova
 {
-    
+    public class DropDownButtonBehavior : Behavior<Button>
+    {
+        private bool isContextMenuOpen;
+
+        protected override void OnAttached()
+        {
+            base.OnAttached();
+            AssociatedObject.AddHandler(Button.ClickEvent, new RoutedEventHandler(AssociatedObject_Click), true);
+        }
+
+        void AssociatedObject_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Button source = sender as Button;
+            if (source != null && source.ContextMenu != null)
+            {
+                if (!isContextMenuOpen)
+                {
+                    // Add handler to detect when the ContextMenu closes
+                    source.ContextMenu.AddHandler(ContextMenu.ClosedEvent, new RoutedEventHandler(ContextMenu_Closed), true);
+                    // If there is a drop-down assigned to this button, then position and display it 
+                    source.ContextMenu.PlacementTarget = source;
+                    source.ContextMenu.Placement = PlacementMode.Bottom;
+                    source.ContextMenu.IsOpen = true;
+                    isContextMenuOpen = true;
+                }
+            }
+        }
+
+        protected override void OnDetaching()
+        {
+            base.OnDetaching();
+            AssociatedObject.RemoveHandler(Button.ClickEvent, new RoutedEventHandler(AssociatedObject_Click));
+        }
+
+        void ContextMenu_Closed(object sender, RoutedEventArgs e)
+        {
+            isContextMenuOpen = false;
+            var contextMenu = sender as ContextMenu;
+            if (contextMenu != null)
+            {
+                contextMenu.RemoveHandler(ContextMenu.ClosedEvent, new RoutedEventHandler(ContextMenu_Closed));
+            }
+        }
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -41,7 +87,7 @@ namespace Prova
 
             InitializeComponent();
 
-            imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources/Rina2.bmp", 50);
+            imgLogo.Source = createbitmapImage(@"C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\Rina2.bmp", 50);
 
             DispatcherTimer timer = new()
             {
@@ -73,9 +119,11 @@ namespace Prova
 
         }
 
+        
+
         void Timer_Tick(object sender, EventArgs e)
         {
-            XDocument xDoc = XDocument.Load("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
             if (demo)
             {
@@ -88,7 +136,7 @@ namespace Prova
                     el.Attribute("status").Value = (_salt % 2).ToString();
                     el.Attribute("status1").Value = (string)status[_salt % 5];
                 }
-                xDoc.Save("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources/alberoFREMM_GP_ASW_Completo.xml");
+                xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             }
 
             foreach (Button mybutton in Wrap.Children){
@@ -184,7 +232,7 @@ namespace Prova
                 MinHeight = 30
             };
 
-            XDocument xDoc = XDocument.Load("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
             IEnumerable<XElement> matches = xDoc.Root
                       .Descendants("child")

@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:Prova"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="RINA HMI"
@@ -19,37 +20,56 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="70"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <StackPanel  x:Name="UpStackPanel" Grid.ColumnSpan="3" Grid.Row="0" Orientation="Horizontal" Background="#0D1D35" Height="70">
-            <Image Name="imgLogo" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left"/>
-            <Button  HorizontalAlignment="Right" Background="#1F437A" Height="30" Width="50" FontWeight="Bold" Foreground="#FFFFFF" Content="USER" Padding="5,2"></Button>
+        <Grid  x:Name="UpStackPanel" Grid.ColumnSpan="3" Grid.Row="0" Background="#0D1D35">
+            <Image HorizontalAlignment="Left" VerticalAlignment="Center" Name="imgLogo" Grid.Column="0" Grid.Row="0" Margin="10,1"/>
+            <Button VerticalAlignment="Center" HorizontalAlignment="Right" Background="#1F437A" Height="25" Width="70" FontWeight="Bold" Foreground="#FFFFFF" Margin="20,1">
+                <i:Interaction.Behaviors>
+                    <local:DropDownButtonBehavior/>
+                </i:Interaction.Behaviors>
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal">
+                        
+                        <TextBlock Text="USER" TextAlignment="Left"/>
+                        <Separator Margin="5,0">
+                            <Separator.LayoutTransform>
+                                <TransformGroup>
+                                    <TransformGroup.Children>
+                                        <TransformCollection>
+                                            <RotateTransform Angle="90"/>
+                                        </TransformCollection>
+                                    </TransformGroup.Children>
+                                </TransformGroup>
+                            </Separator.LayoutTransform>
+                        </Separator>
+                        <Path Margin="2" VerticalAlignment="Center" Width="9" Fill="#FF527DB5" Stretch="Uniform" HorizontalAlignment="Right" Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "/>
+                    </StackPanel>
+                </Button.Content>
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Logout"/>
+                        <MenuItem Header="Demo" Click="Demo_Click"/>
+                        <Separator/>
+                        <MenuItem Header="Settings"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
             
-        </StackPanel>
+        </Grid>
 
         <DockPanel x:Name="leftDocPanel" Grid.Row="1" Background="#C2D4F0">
-            <Menu DockPanel.Dock="Top" Grid.Row="0">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_Demo" Click="Demo_Click" />
-                    <MenuItem Header="_Open" />
-                    <MenuItem Header="_Save" />
-                    <Separator />
-                    <MenuItem Header="_Exit" />
-                </MenuItem>
-            </Menu>
-            <ScrollViewer>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBox x:Name="txtSearch" Background="#C2D4F0" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" MinWidth="200" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
+                    <TextBox x:Name="txtSearch" Background="#C2D4F0" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
                 <TreeView
                     Name="dirTree"
                     Background="#C2D4F0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    MouseUp="Tv_MouseUp"
-                    VirtualizingStackPanel.IsVirtualizing="False"
-                    VirtualizingStackPanel.VirtualizationMode="Standard">
+                    MouseUp="Tv_MouseUp">
 
 
                     <TreeView.ItemContainerStyle>
