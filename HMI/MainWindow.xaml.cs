@@ -41,8 +41,10 @@ namespace Prova
 
             InitializeComponent();
 
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
+            DispatcherTimer timer = new()
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
             timer.Tick += Timer_Tick;
             timer.Start();
 
@@ -114,7 +116,7 @@ namespace Prova
 
         private void Demo_Click(object sender, RoutedEventArgs e)
         {
-            demo = true;
+            demo = !demo;
 
         }
         //This function is called recursively until all nodes are loaded
