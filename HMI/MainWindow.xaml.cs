@@ -41,6 +41,8 @@ namespace Prova
 
             InitializeComponent();
 
+            imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources/Rina2.bmp", 50);
+
             DispatcherTimer timer = new()
             {
                 Interval = TimeSpan.FromSeconds(1)
@@ -73,7 +75,7 @@ namespace Prova
 
         void Timer_Tick(object sender, EventArgs e)
         {
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources/alberoFREMM_GP_ASW_Completo.xml");
 
             if (demo)
             {
@@ -86,7 +88,7 @@ namespace Prova
                     el.Attribute("status").Value = (_salt % 2).ToString();
                     el.Attribute("status1").Value = (string)status[_salt % 5];
                 }
-                xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+                xDoc.Save("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources/alberoFREMM_GP_ASW_Completo.xml");
             }
 
             foreach (Button mybutton in Wrap.Children){
@@ -182,7 +184,7 @@ namespace Prova
                 MinHeight = 30
             };
 
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources/alberoFREMM_GP_ASW_Completo.xml");
 
             IEnumerable<XElement> matches = xDoc.Root
                       .Descendants("child")
@@ -235,6 +237,18 @@ namespace Prova
             {
                 ExpandTreeItem((TreeViewItem)item.Items[i]);
             }
+        }
+
+        public static BitmapImage createbitmapImage(string P, int h)
+        {
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.UriSource = new Uri(P);
+            //bitmapImage.DecodePixelWidth = w;
+            bitmapImage.DecodePixelHeight = h;
+            bitmapImage.EndInit();
+
+            return bitmapImage;
         }
     }
 }

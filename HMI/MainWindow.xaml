@@ -24,8 +24,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel  x:Name="UpStackPanel" Grid.ColumnSpan="3" Grid.Row="0" Orientation="Horizontal" Background="#0D1D35" Height="70">
+            <Image Name="imgLogo" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left"/>
             <Button  HorizontalAlignment="Right" Background="#1F437A" Height="30" Width="50" FontWeight="Bold" Foreground="#FFFFFF" Content="USER" Padding="5,2"></Button>
-            <Image Name="imgLogo" Grid.Column="0" Grid.Row="0" Height="50" HorizontalAlignment="Left"/>
+            
         </StackPanel>
 
         <DockPanel x:Name="leftDocPanel" Grid.Row="1" Background="#C2D4F0">
