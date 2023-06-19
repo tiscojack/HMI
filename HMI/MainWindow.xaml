@@ -10,7 +10,10 @@
     SizeToContent="Manual"
     WindowState="Maximized"
     mc:Ignorable="d">
-
+    <Window.Resources>
+        <Image x:Key="ita" Source="C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\ita.jpg"/>
+        <Image x:Key="uk" Source="C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\uk.jpg"/>
+    </Window.Resources>
     <Grid>
         
         <Grid.ColumnDefinitions>
@@ -20,32 +23,23 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="60"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid  x:Name="UpStackPanel" Grid.ColumnSpan="3" Grid.Row="0" Background="#0D1D35">
-            <Image HorizontalAlignment="Left" VerticalAlignment="Center" Name="imgLogo" Grid.Column="0" Grid.Row="0" Margin="10,1"/>
-            <Button VerticalAlignment="Center" HorizontalAlignment="Right" Background="#1F437A" Height="25" Width="70" FontWeight="Bold" Foreground="#FFFFFF" Margin="20,1">
+            <Image HorizontalAlignment="Left" VerticalAlignment="Center" Name="imgLogo" Grid.Column="0" Grid.Row="0" Margin="20,10"/>
+            <Button BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Click="LanguageButton_Click" Name="LanguageButton" Background="#0D1D35" Height="25" Width="35" HorizontalAlignment ="Right" Margin="110, 0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <DynamicResource ResourceKey="ita"/>
+            </Button>
+            <Button VerticalAlignment="Center" HorizontalAlignment="Right" Background="#1F437A" Height="30" Width="70" FontWeight="Bold" Foreground="#FFFFFF" Margin="20,0">
                 <i:Interaction.Behaviors>
                     <local:DropDownButtonBehavior/>
                 </i:Interaction.Behaviors>
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
-                        
-                        <TextBlock Text="USER" TextAlignment="Left"/>
-                        <Separator Margin="5,0">
-                            <Separator.LayoutTransform>
-                                <TransformGroup>
-                                    <TransformGroup.Children>
-                                        <TransformCollection>
-                                            <RotateTransform Angle="90"/>
-                                        </TransformCollection>
-                                    </TransformGroup.Children>
-                                </TransformGroup>
-                            </Separator.LayoutTransform>
-                        </Separator>
-                        <Path Margin="2" VerticalAlignment="Center" Width="9" Fill="#FF527DB5" Stretch="Uniform" HorizontalAlignment="Right" Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "/>
+                        <TextBlock Text="USER" TextAlignment="Left" FontSize="10"/>
+                        <Path Margin="10,0,0,0" VerticalAlignment="Center" Width="10" Fill="#F5F5F5" Stretch="Uniform" HorizontalAlignment="Right" Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "/>
                     </StackPanel>
                 </Button.Content>
                 <Button.ContextMenu>
@@ -61,10 +55,11 @@
         </Grid>
 
         <DockPanel x:Name="leftDocPanel" Grid.Row="1" Background="#C2D4F0">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
                 <StackPanel>
                     <TextBox x:Name="txtSearch" Background="#C2D4F0" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
                 <TreeView
+                    BorderThickness="0"
                     Name="dirTree"
                     Background="#C2D4F0"
                     HorizontalAlignment="Stretch"

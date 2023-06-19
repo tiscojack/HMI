@@ -119,7 +119,11 @@ namespace Prova
 
         }
 
-        
+        private void LanguageButton_Click(object sender, RoutedEventArgs e)
+        {
+            LanguageButton.Content = FindResource(LanguageButton.Content == FindResource("ita") ? "uk" : "ita");
+
+        }
 
         void Timer_Tick(object sender, EventArgs e)
         {

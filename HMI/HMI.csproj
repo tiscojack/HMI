@@ -11,6 +11,8 @@
     <None Remove="resources\alberoFREMM_GP_ASW_Completo.xml" />
     <None Remove="resources\albero_configurazione.xml" />
     <None Remove="resources\GerarchiaSistemaOAMD.xml" />
+    <None Remove="resources\ita.jpg" />
+    <None Remove="resources\uk.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +25,12 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <Resource Include="resources\GerarchiaSistemaOAMD.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\ita.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\uk.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
 
