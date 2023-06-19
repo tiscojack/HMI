@@ -20,6 +20,17 @@ using System.Xml.Linq;
 using System.Windows.Threading;
 using System.Windows.Controls.Primitives;
 using Microsoft.Xaml.Behaviors;
+using System.IO;
+using System.ComponentModel.DataAnnotations;
+using System.DirectoryServices.ActiveDirectory;
+using System.Globalization;
+using Path = System.IO.Path;
+using System.Diagnostics.Eventing.Reader;
+using System.Reflection.Metadata;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.WPF;
+using System.Reflection.PortableExecutable;
 
 namespace Prova
 {
@@ -67,6 +78,31 @@ namespace Prova
             }
         }
     }
+    public enum status1
+    {
+        OPERATIVE,
+        NOT_OPERATIVE,
+        MAINTENANCE,
+        SHUTDOWN,
+        FAILURE
+    }
+    public class DataEntry
+    {
+        private bool status;
+        private DateTime timestamp;
+        private status1 status1;
+
+        public DataEntry(DateTime timestamp, bool status, status1 status1)
+        {
+            this.status = status;
+            this.timestamp = timestamp;
+            this.status1 = status1;
+        }
+
+        public bool get_status()
+        { return this.status;}
+    }
+
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -81,6 +117,21 @@ namespace Prova
             "MAINTENANCE",
             "SHUTDOWN",
             "FAILURE"};
+
+        /*
+        public class ViewModel
+        {
+            public ISeries[] Series { get; set; }
+                = new ISeries[]
+                {
+                new LineSeries<double>
+                {
+                    Values = new double[] { 2, 1, 3, 5, 3, 4, 6 },
+                    Fill = null
+                }
+                };
+        }
+        */
 
         public MainWindow()
         {
@@ -98,7 +149,7 @@ namespace Prova
 
             //First, we'll load the Xml document
             XmlDocument xDoc = new();
-            xDoc.Load(@"resources/albero_configurazione.xml");
+            xDoc.Load(@"resources\albero_configurazione.xml");
 
             //Now, clear out the treeview, 
             dirTree.Items.Clear();
@@ -127,8 +178,12 @@ namespace Prova
 
         void Timer_Tick(object sender, EventArgs e)
         {
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
+            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+            Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
+
+            /*
+            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             if (demo)
             {
                 IEnumerable<XElement> matches = xDoc.Root
@@ -142,20 +197,28 @@ namespace Prova
                 }
                 xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             }
+            */
 
-            foreach (Button mybutton in Wrap.Children){
-                IEnumerable<XElement> matches = xDoc.Root
-                      .Descendants("child")
-                      .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
 
-                if (matches.Any() == false) return;
-                string status = (string)matches.First().Attribute("status").Value;
+            foreach (ToggleButton mybutton in Wrap.Children){
+            bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
 
-                if (status == "1")
+            /*
+            IEnumerable<XElement> matches = xDoc.Root
+                  .Descendants("child")
+                  .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
+
+            if (matches.Any() == false) return;
+            string status = (string)matches.First().Attribute("status").Value;
+            */
+
+
+            
+                if (status == true)
                 {
                     mybutton.Background = Brushes.Green;
                 }
-                else if (status == "0")
+                else if (status == false)
                 {
                     mybutton.Background = Brushes.Red;
                 }
@@ -163,8 +226,9 @@ namespace Prova
                 {
                     mybutton.Background = Brushes.White;
                 }
-
+            
             }
+            
         }
 
 
@@ -173,23 +237,133 @@ namespace Prova
             demo = !demo;
 
         }
+
+        private void Preview_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (ToggleButton mybutton in Wrap.Children)
+            {
+                /*
+                LineSeries<double> prova = new LineSeries<double>
+                {
+                    Values = new double[] { 2, 1, 3, 5, 3, 4, 6 },
+                    Fill = null
+                };
+                if (mybutton.IsChecked == true)
+                {
+                    CartesianChart grafico = new()
+                    {
+                        Series = (IEnumerable<ISeries>)prova
+                    };
+                    
+                }
+                */
+            }
+        }
+        public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
+        {
+            // Unix timestamp is seconds past epoch
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
+            return dateTime;
+        }
+        private void Import_CSV(string filePath, out Dictionary<string, List<DataEntry>> csvData)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(filePath))
+                    throw new Exception(String.Format("No file selected"));
+                if (!File.Exists(filePath) || (Path.GetExtension(filePath) != ".csv"))
+                {
+                    MessageBox.Show(String.Format("The selected file({0}) doesn't exist", filePath), "R+G Management", MessageBoxButton.OK, MessageBoxImage.Error);
+                    csvData = null;
+                    return;
+                }
+                csvData = new Dictionary<string, List<DataEntry>>();
+                StreamReader sR = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                string allFile = sR.ReadToEnd();
+                sR.Close();
+                var lines = allFile.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+                string line;
+                int i = 0;
+                while (i < lines.Length)
+                {
+                    line = lines[i++];
+                    var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    status1 status1;
+                    switch(splittedLine[3])
+                    {
+                        case "OPERATIVE":
+                            status1 = (status1)1;
+                            break;
+                        case "NOT_OPERATIVE":
+                            status1 = (status1)2;
+                            break;
+                        case "MAINTENANCE":
+                            status1 = (status1)3;
+                            break;
+                        case "SHUTDOWN":
+                            status1 = (status1)4;
+                            break;
+                        case "FAILURE":
+                            status1 = (status1)5;
+                            break;
+                        default:
+                            status1 = (status1)2;
+                            break;
+                    }
+                    DataEntry data = new DataEntry(UnixTimeStampToDateTime(Double.Parse(splittedLine[1])), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
+                    if (!csvData.ContainsKey(splittedLine[0]))
+                    {
+                        List<DataEntry> list = new List<DataEntry>{data};
+                        csvData.Add(splittedLine[0], list);                    
+                    } else
+                    {
+                        csvData[splittedLine[0]].Add(data); 
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("There are some issue with the csv" + ex.Message);
+            }
+        }
+        
+
         //This function is called recursively until all nodes are loaded
         private void AddTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
         {
             XmlNode xNode;
             TreeViewItem tNode;
             XmlNodeList xNodeList;
+            //var csv = new StringBuilder();
             if (xmlNode.HasChildNodes) //The current node has children
             {
                 xNodeList = xmlNode.ChildNodes;
+                
                 for (int x = 0; x <= xNodeList.Count - 1; x++)
                 //Loop through the child nodes
                 {
                     xNode = xmlNode.ChildNodes[x];
 
                     TreeViewItem nuovoNodo = new TreeViewItem();
-                    nuovoNodo.Header = xNode.Attributes["sys"].Value;
-                    nuovoNodo.Tag = (string)xNode.Attributes["SBC"].Value;
+                    var sys = xNode.Attributes["sys"].Value.ToString();
+                    var sbc = xNode.Attributes["SBC"].Value.ToString();
+
+                    /*
+                    var status = xNode.Attributes["status"].Value.ToString();
+                    var status1 = xNode.Attributes["status1"].Value.ToString();
+                    for (int i = 0; i <= 10; i++)
+                    {
+                        var timestamp = 1687170643 + i * 5;
+                        var newLine = $"{sbc},{timestamp},{status},{status1}";
+                        csv.AppendLine(newLine);
+                    }
+                    */
+
+
+                    nuovoNodo.Header = sys;
+                    nuovoNodo.Tag = sbc;
                     
                     treeNode.Items.Add(nuovoNodo);
 
@@ -197,12 +371,14 @@ namespace Prova
                     AddTreeNode(xNode, tNode);
                 }
             }
+            //File.AppendAllText("C:\\Users\\S_GT011\\Documents\\OAMD/prova.csv", csv.ToString());
         }
 
         private void Tv_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TreeView treeView;
             TreeViewItem item;
+            
             if (sender != null)
             {
                 Wrap.Children.Clear();
@@ -229,13 +405,17 @@ namespace Prova
 
         private void AddToDocPanel(object header, object tag)
         {
-            Button mybutton = new()
+            ToggleButton mybutton = new()
             {
                 Content = header,
                 Margin = new Thickness(10, 20, 10, 20),
-                MinHeight = 30
+                MinHeight = 30,
             };
-
+            
+            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+            Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
+            bool status = csvData[(string)tag].Last().get_status();
+            /*
             XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
             IEnumerable<XElement> matches = xDoc.Root
@@ -243,12 +423,12 @@ namespace Prova
                       .Where(el => (string)el.Attribute("SBC") == (string)tag);
 
             string status = (string)matches.First().Attribute("status").Value;
-          
+            */
 
-            if (status == "1")
+            if (status == true)
             {
                 mybutton.Background = Brushes.Green;
-            } else if (status == "0")
+            } else if (status == false)
             {
                 mybutton.Background = Brushes.Red;
             } else

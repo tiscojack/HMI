@@ -22,6 +22,7 @@
     <EmbeddedResource Include="resources\albero_configurazione.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.801" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <Resource Include="resources\GerarchiaSistemaOAMD.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

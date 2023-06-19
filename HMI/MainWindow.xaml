@@ -6,6 +6,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:Prova"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     Title="RINA HMI"
     SizeToContent="Manual"
     WindowState="Maximized"
@@ -23,16 +24,23 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid  x:Name="UpStackPanel" Grid.ColumnSpan="3" Grid.Row="0" Background="#0D1D35">
+            <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="1"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+            </Grid.RowDefinitions>
+            
             <Image HorizontalAlignment="Left" VerticalAlignment="Center" Name="imgLogo" Grid.Column="0" Grid.Row="0" Margin="20,10"/>
-            <Button BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Click="LanguageButton_Click" Name="LanguageButton" Background="#0D1D35" Height="25" Width="35" HorizontalAlignment ="Right" Margin="110, 0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <Canvas Grid.Row="1" Background="White"/>
+            <Button Grid.Row="2" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Click="LanguageButton_Click" Name="LanguageButton" Background="#0D1D35" Height="25" Width="35" HorizontalAlignment ="Right" Margin="110, 0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                 <DynamicResource ResourceKey="ita"/>
             </Button>
-            <Button VerticalAlignment="Center" HorizontalAlignment="Right" Background="#1F437A" Height="30" Width="70" FontWeight="Bold" Foreground="#FFFFFF" Margin="20,0">
+            <Button Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" Background="#1F437A" Height="30" Width="70" FontWeight="Bold" Foreground="#FFFFFF" Margin="20,0">
                 <i:Interaction.Behaviors>
                     <local:DropDownButtonBehavior/>
                 </i:Interaction.Behaviors>
@@ -44,7 +52,7 @@
                 </Button.Content>
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Logout"/>
+                        <MenuItem Header="Preview" Click="Preview_Click"/>
                         <MenuItem Header="Demo" Click="Demo_Click"/>
                         <Separator/>
                         <MenuItem Header="Settings"/>
