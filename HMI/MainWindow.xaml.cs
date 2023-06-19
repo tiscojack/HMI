@@ -69,7 +69,7 @@ namespace Prova
 
         void timer_Tick(object sender, EventArgs e)
         {
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\s_ls015\\Documents/alberoFREMM_GP_ASW_Completo.xml");
 
             if (demo)
             {
@@ -82,7 +82,7 @@ namespace Prova
                     el.Attribute("status").Value = (_salt % 2).ToString();
                     el.Attribute("status1").Value = (string)status[_salt % 5];
                 }
-                xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+                xDoc.Save("C:\\Users\\s_ls015\\Documents/alberoFREMM_GP_ASW_Completo.xml");
             }
 
             foreach (Button mybutton in Wrap.Children){
@@ -180,7 +180,7 @@ namespace Prova
             mybutton.Margin = new Thickness(10, 20, 10, 20);
             mybutton.MinHeight = 30;
 
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+            XDocument xDoc = XDocument.Load("C:\\Users\\s_ls015\\Documents/alberoFREMM_GP_ASW_Completo.xml");
 
             IEnumerable<XElement> matches = xDoc.Root
                       .Descendants("child")
