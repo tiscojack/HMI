@@ -1,36 +1,20 @@
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.WPF;
+using Microsoft.Xaml.Behaviors;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Xml;
-using static System.Net.Mime.MediaTypeNames;
-using System.Xml.Linq;
 using System.Windows.Threading;
-using System.Windows.Controls.Primitives;
-using Microsoft.Xaml.Behaviors;
-using System.IO;
-using System.ComponentModel.DataAnnotations;
-using System.DirectoryServices.ActiveDirectory;
-using System.Globalization;
+using System.Xml;
 using Path = System.IO.Path;
-using System.Diagnostics.Eventing.Reader;
-using System.Reflection.Metadata;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.WPF;
-using System.Reflection.PortableExecutable;
 
 namespace Prova
 {
@@ -80,12 +64,13 @@ namespace Prova
     }
     public enum status1
     {
-        OPERATIVE,
-        NOT_OPERATIVE,
-        MAINTENANCE,
+        FAILURE,
         SHUTDOWN,
-        FAILURE
+        MAINTENANCE,
+        NOT_OPERATIVE,
+        OPERATIVE
     }
+
     public class DataEntry
     {
         private bool status;
@@ -99,8 +84,9 @@ namespace Prova
             this.status1 = status1;
         }
 
-        public bool get_status()
-        { return this.status;}
+        public bool get_status() { return this.status; }
+        public DateTime get_timestamp() { return this.timestamp; }
+        public status1 get_status1() { return this.status1; }
     }
 
 
@@ -111,20 +97,6 @@ namespace Prova
     {
         bool demo = false;
 
-
-
-        public ISeries[] Series { get; set; }
-                    = new ISeries[]
-                    {
-                new LineSeries<int>
-                {
-                    Values = new int[] { 4, 6, 5, 3, -3, -1, 2 }
-                },
-                new ColumnSeries<double>
-                {
-                    Values = new double[] { 2, 5, 4, -2, 4, -3, 5 }
-                }
-                    };
         public MainWindow()
         {
 
@@ -190,24 +162,25 @@ namespace Prova
                 xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             }
             */
-            
-            try 
-            { foreach(ToggleButton mybutton in Wrap.Children) { } }
-            catch { return;  };
-            foreach (ToggleButton mybutton in Wrap.Children){
+
+            try
+            { foreach (ToggleButton mybutton in Wrap.Children) { } }
+            catch { return; };
+            foreach (ToggleButton mybutton in Wrap.Children)
+            {
                 bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
 
-            /*
-            IEnumerable<XElement> matches = xDoc.Root
-                  .Descendants("child")
-                  .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
+                /*
+                IEnumerable<XElement> matches = xDoc.Root
+                      .Descendants("child")
+                      .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
 
-            if (matches.Any() == false) return;
-            string status = (string)matches.First().Attribute("status").Value;
-            */
+                if (matches.Any() == false) return;
+                string status = (string)matches.First().Attribute("status").Value;
+                */
 
 
-            
+
                 if (status == true)
                 {
                     mybutton.Background = Brushes.Green;
@@ -220,9 +193,9 @@ namespace Prova
                 {
                     mybutton.Background = Brushes.White;
                 }
-            
+
             }
-            
+
         }
 
 
@@ -234,15 +207,37 @@ namespace Prova
 
         private void Preview_Click(object sender, RoutedEventArgs e)
         {
-
+            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+            Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
+            DataEntry[] samples = csvData["FREMM_F4"].ToArray();
             CartesianChart grafico = new()
             {
+                Width = 800,
+                Height = 500,
+                Series = new[]
+                {
+                new ColumnSeries<DataEntry>
+                    {
+                    Values = samples,
+                    MaxBarWidth = double.MaxValue,
+                    Padding = 0,
+                    Mapping = (sample, chartPoint) =>
+                        {
 
-                Series = Series
-                
+                        chartPoint.PrimaryValue = (double)sample.get_status1();
+                        chartPoint.SecondaryValue = chartPoint.Index;
+                        if (sample.get_status() == true) {chartPoint.Fill = SKColors.Green; }
+                        else {chartPoint.Fill = SKColors.Red; }
+                        }
+                    }
+                },
+                XAxes = new[] { new Axis { Labeler = value => $"{value}" } },
+                YAxes = new[] { new Axis { Labels = new string[]
+                    { "FAILURE", "SHUTDOWN", "MAINTENANCE", "NOT_OPERATIVE", "OPERATIVE" } } }
+
+
             };
             Wrap.Children.Clear();
-            grafico.Width = 500;
             DocPanel.Children.Add(grafico);
 
         }
@@ -279,35 +274,36 @@ namespace Prova
                     line = lines[i++];
                     var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     status1 status1;
-                    switch(splittedLine[3])
+                    switch (splittedLine[3])
                     {
                         case "OPERATIVE":
-                            status1 = (status1)1;
-                            break;
-                        case "NOT_OPERATIVE":
-                            status1 = (status1)2;
-                            break;
-                        case "MAINTENANCE":
-                            status1 = (status1)3;
-                            break;
-                        case "SHUTDOWN":
                             status1 = (status1)4;
                             break;
+                        case "NOT_OPERATIVE":
+                            status1 = (status1)3;
+                            break;
+                        case "MAINTENANCE":
+                            status1 = (status1)2;
+                            break;
+                        case "SHUTDOWN":
+                            status1 = (status1)1;
+                            break;
                         case "FAILURE":
-                            status1 = (status1)5;
+                            status1 = (status1)0;
                             break;
                         default:
-                            status1 = (status1)2;
+                            status1 = (status1)1;
                             break;
                     }
                     DataEntry data = new DataEntry(UnixTimeStampToDateTime(Double.Parse(splittedLine[1])), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
                     if (!csvData.ContainsKey(splittedLine[0]))
                     {
-                        List<DataEntry> list = new List<DataEntry>{data};
-                        csvData.Add(splittedLine[0], list);                    
-                    } else
+                        List<DataEntry> list = new List<DataEntry> { data };
+                        csvData.Add(splittedLine[0], list);
+                    }
+                    else
                     {
-                        csvData[splittedLine[0]].Add(data); 
+                        csvData[splittedLine[0]].Add(data);
                     }
                 }
             }
@@ -316,7 +312,7 @@ namespace Prova
                 throw new Exception("There are some issue with the csv" + ex.Message);
             }
         }
-        
+
 
         //This function is called recursively until all nodes are loaded
         private void AddTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
@@ -328,7 +324,7 @@ namespace Prova
             if (xmlNode.HasChildNodes) //The current node has children
             {
                 xNodeList = xmlNode.ChildNodes;
-                
+
                 for (int x = 0; x <= xNodeList.Count - 1; x++)
                 //Loop through the child nodes
                 {
@@ -352,7 +348,7 @@ namespace Prova
 
                     nuovoNodo.Header = sys;
                     nuovoNodo.Tag = sbc;
-                    
+
                     treeNode.Items.Add(nuovoNodo);
 
                     tNode = treeNode.Items[x] as TreeViewItem;
@@ -402,7 +398,7 @@ namespace Prova
                 Margin = new Thickness(10, 20, 10, 20),
                 MinHeight = 30,
             };
-            
+
             Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
             Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
             bool status = csvData[(string)tag].Last().get_status();
@@ -419,10 +415,12 @@ namespace Prova
             if (status == true)
             {
                 mybutton.Background = Brushes.Green;
-            } else if (status == false)
+            }
+            else if (status == false)
             {
                 mybutton.Background = Brushes.Red;
-            } else
+            }
+            else
             {
                 mybutton.Background = Brushes.White;
             }
@@ -447,7 +445,7 @@ namespace Prova
 
         private void ExpandTreeItem(TreeViewItem item)
         {
-            string text;          
+            string text;
             item.Foreground = Brushes.Black;
             item.SetValue(TreeViewItem.IsExpandedProperty, true);
             text = txtSearch.Text.ToLower();
