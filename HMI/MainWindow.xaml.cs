@@ -1,6 +1,5 @@
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView.WPF;
+using LiveChartsCore;
 using Microsoft.Xaml.Behaviors;
 using SkiaSharp;
 using System;
@@ -16,6 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Xml;
 using Path = System.IO.Path;
+using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.WPF;
 
 namespace Prova
 {
@@ -166,37 +167,39 @@ namespace Prova
             */
 
             try
-            { foreach (ToggleButton mybutton in Wrap.Children) { } }
-            catch { return; };
-            foreach (ToggleButton mybutton in Wrap.Children)
             {
-                bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
-
-                /*
-                IEnumerable<XElement> matches = xDoc.Root
-                      .Descendants("child")
-                      .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
-
-                if (matches.Any() == false) return;
-                string status = (string)matches.First().Attribute("status").Value;
-                */
-
-
-
-                if (status == true)
+                foreach (ToggleButton mybutton in Wrap.Children)
                 {
-                    mybutton.Background = Brushes.Green;
-                }
-                else if (status == false)
-                {
-                    mybutton.Background = Brushes.Red;
-                }
-                else
-                {
-                    mybutton.Background = Brushes.White;
-                }
+                    bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
 
+                    /*
+                    IEnumerable<XElement> matches = xDoc.Root
+                          .Descendants("child")
+                          .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
+
+                    if (matches.Any() == false) return;
+                    string status = (string)matches.First().Attribute("status").Value;
+                    */
+
+
+
+                    if (status == true)
+                    {
+                        mybutton.Background = Brushes.Green;
+                    }
+                    else if (status == false)
+                    {
+                        mybutton.Background = Brushes.Red;
+                    }
+                    else
+                    {
+                        mybutton.Background = Brushes.White;
+                    }
+
+                }
             }
+            catch { return; };
+
 
         }
 
@@ -209,89 +212,82 @@ namespace Prova
 
         private void Preview_Click(object sender, RoutedEventArgs e)
         {
-            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-            Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
-            List<DataEntry> samples = csvData["FREMM_F4"];
-            List<DataEntry> up = new();
-            List<DataEntry> down = new();
-            for (int i = 0; i < samples.Count; i++)
+            try
             {
-                if (samples[i].get_status())
+                Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+                Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
+                foreach (ToggleButton mybutton in Wrap.Children)
                 {
-                    up.Add(samples[i]);
-                    down.Add(null);
-                    if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { up.Add(samples[i + 1]); };
-                }
-                else
-                {
-                    down.Add(samples[i]);
-                    up.Add(null);
-                    if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(samples[i + 1]); };
-                };
-
-            }
-
-            CartesianChart grafico = new()
-            {
-                Name = "FREMM",
-                Width = 800,
-                MaxHeight = 200,
-                Series = new[]
-                {
-                    new StepLineSeries<DataEntry>()
-                    {
-                        Values = up,
-                        Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 4 },
-                        GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
-                        Mapping = (sample, chartPoint) =>
+                    if ((bool)mybutton.IsChecked)
+                    {                       
+                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString().Substring(33)];
+                        List<DataEntry> up = new();
+                        List<DataEntry> down = new();
+                        for (int i = 0; i < samples.Count; i++)
                         {
+                            if (samples[i].get_status())
+                            {
+                                up.Add(samples[i]);
+                                down.Add(null);
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { up.Add(samples[i + 1]); };
+                            }
+                            else
+                            {
+                                down.Add(samples[i]);
+                                up.Add(null);
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(samples[i + 1]); };
+                            };
 
-                        chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
-                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
                         }
 
-                    },
-                    new StepLineSeries<DataEntry>()
-                    {
-                        Values = down,
-                        Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 4 },
-                        GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
-                        Mapping = (sample, chartPoint) =>
+                        CartesianChart grafico = new()
                         {
+                            Width = 400,
+                            MaxHeight = 200,
+                            Series = new[]
+                            {
+                                new StepLineSeries<DataEntry>()
+                                {
+                                    Values = up,
+                                    Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 4 },
+                                    GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
+                                    Mapping = (sample, chartPoint) =>
+                                    {
 
-                        chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
-                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
-                        }
+                                        chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
+                                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
+                                    }
+                                },
+                                new StepLineSeries<DataEntry>()
+                                {
+                                    Values = down,
+                                    Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 4 },
+                                    GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
+                                    Mapping = (sample, chartPoint) =>
+                                    {
 
+                                        chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
+                                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
+                                    }
+
+                                }
+                            },
+                            XAxes = new[] { new Axis { Labeler = value => $"{value}" + "s" } },
+                            YAxes = new[] { new Axis { Labels = new string[] { "DOWN", "UP" } } }
+                        };
+                        
+                        DocPanel.Children.Add(grafico);
                     }
+                }
+                Wrap.Children.Clear();
 
-
-
-    /*
-    new ColumnSeries<DataEntry>
-        {
-        Values = samples,
-        MaxBarWidth = double.MaxValue,
-        Padding = 0,
-        Mapping = (sample, chartPoint) =>
-            {
-
-            chartPoint.PrimaryValue = (double)sample.get_status1();
-            chartPoint.SecondaryValue = chartPoint.Index;
-            //if (sample.get_status() == true) {chartPoint.Fill = SKColors.Green; }
-            //else {chartPoint.Fill = SKColors.Red; }
             }
-        } */
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return;
+            }
 
-
-},
-                XAxes = new[] { new Axis { Labeler = value => $"{value}" + "s" } },
-                YAxes = new[] { new Axis { Labels = new string[] { "DOWN", "UP" } } }
-
-
-            };
-            Wrap.Children.Clear();
-            DocPanel.Children.Add(grafico);
 
         }
 
@@ -418,7 +414,7 @@ namespace Prova
             TreeViewItem item;
             if (DocPanel.Children.Count >= 2)
             {
-                DocPanel.Children.RemoveAt(1);
+                DocPanel.Children.RemoveRange(1,DocPanel.Children.Count);
             }
             if (sender != null)
             {
