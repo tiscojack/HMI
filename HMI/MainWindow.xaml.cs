@@ -229,13 +229,13 @@ namespace Prova
                             {
                                 up.Add(samples[i]);
                                 down.Add(null);
-                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { up.Add(samples[i + 1]); };
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { up.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); down.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); };
                             }
                             else
                             {
                                 down.Add(samples[i]);
                                 up.Add(null);
-                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(samples[i + 1]); };
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); up.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); };
                             };
 
                         }
@@ -244,16 +244,16 @@ namespace Prova
                         {
                             Width = 400,
                             MaxHeight = 200,
+                            TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden,
                             Series = new[]
                             {
                                 new StepLineSeries<DataEntry>()
                                 {
                                     Values = up,
-                                    Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 4 },
-                                    GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
+                                    Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 3 },
+                                    GeometrySize = 0,
                                     Mapping = (sample, chartPoint) =>
                                     {
-
                                         chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
                                     }
@@ -261,19 +261,18 @@ namespace Prova
                                 new StepLineSeries<DataEntry>()
                                 {
                                     Values = down,
-                                    Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 4 },
-                                    GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
+                                    Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 3 },
+                                    GeometrySize = 0,
                                     Mapping = (sample, chartPoint) =>
                                     {
-
                                         chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
                                     }
 
                                 }
                             },
-                            XAxes = new[] { new Axis { Labeler = value => $"{value}" + "s" } },
-                            YAxes = new[] { new Axis { Labels = new string[] { "DOWN", "UP" } } }
+                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 2.5},  },
+                            YAxes = new List<Axis> { new Axis { Labels = new string[] { "DOWN", "UP" } } }
                         };
                         
                         DocPanel.Children.Add(grafico);
