@@ -110,29 +110,21 @@ namespace Prova
     public partial class MainWindow : Window
     {
         bool demo = false;
-        readonly string[] status =
-        {
-            "OPERATIVE",
-            "NOT_OPERATIVE",
-            "MAINTENANCE",
-            "SHUTDOWN",
-            "FAILURE"};
 
-        /*
-        public class ViewModel
-        {
-            public ISeries[] Series { get; set; }
-                = new ISeries[]
+
+
+        public ISeries[] Series { get; set; }
+                    = new ISeries[]
+                    {
+                new LineSeries<int>
                 {
-                new LineSeries<double>
+                    Values = new int[] { 4, 6, 5, 3, -3, -1, 2 }
+                },
+                new ColumnSeries<double>
                 {
-                    Values = new double[] { 2, 1, 3, 5, 3, 4, 6 },
-                    Fill = null
+                    Values = new double[] { 2, 5, 4, -2, 4, -3, 5 }
                 }
-                };
-        }
-        */
-
+                    };
         public MainWindow()
         {
 
@@ -198,10 +190,12 @@ namespace Prova
                 xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             }
             */
-
-
+            
+            try 
+            { foreach(ToggleButton mybutton in Wrap.Children) { } }
+            catch { return;  };
             foreach (ToggleButton mybutton in Wrap.Children){
-            bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
+                bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
 
             /*
             IEnumerable<XElement> matches = xDoc.Root
@@ -240,29 +234,23 @@ namespace Prova
 
         private void Preview_Click(object sender, RoutedEventArgs e)
         {
-            foreach (ToggleButton mybutton in Wrap.Children)
+
+            CartesianChart grafico = new()
             {
-                /*
-                LineSeries<double> prova = new LineSeries<double>
-                {
-                    Values = new double[] { 2, 1, 3, 5, 3, 4, 6 },
-                    Fill = null
-                };
-                if (mybutton.IsChecked == true)
-                {
-                    CartesianChart grafico = new()
-                    {
-                        Series = (IEnumerable<ISeries>)prova
-                    };
-                    
-                }
-                */
-            }
+
+                Series = Series
+                
+            };
+            Wrap.Children.Clear();
+            grafico.Width = 500;
+            DocPanel.Children.Add(grafico);
+
         }
+
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            DateTime dateTime = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
@@ -378,7 +366,10 @@ namespace Prova
         {
             TreeView treeView;
             TreeViewItem item;
-            
+            if (DocPanel.Children.Count >= 2)
+            {
+                DocPanel.Children.RemoveAt(1);
+            }
             if (sender != null)
             {
                 Wrap.Children.Clear();
@@ -389,21 +380,21 @@ namespace Prova
                 {
                     if (item.Items.Count == 0)
                     {
-                        AddToDocPanel(item.Header, item.Tag);
+                        AddToWrapPanel(item.Header, item.Tag);
                     }
                     else
                     {
                         for (int i = 0; i < item.Items.Count; i++)
                         {
                             TreeViewItem tvItem = (TreeViewItem)item.Items[i];
-                            AddToDocPanel(tvItem.Header, tvItem.Tag);
+                            AddToWrapPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
                 }
             }
         }
 
-        private void AddToDocPanel(object header, object tag)
+        private void AddToWrapPanel(object header, object tag)
         {
             ToggleButton mybutton = new()
             {

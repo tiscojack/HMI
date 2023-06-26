@@ -98,7 +98,7 @@
                     Background="#F5F5F5"
                     >
                     <WrapPanel
-                        x:Name="Wrap"
+                        Name="Wrap"
                         Grid.Column="2"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
