@@ -1,4 +1,5 @@
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
 using Microsoft.Xaml.Behaviors;
 using SkiaSharp;
@@ -74,18 +75,18 @@ namespace Prova
     public class DataEntry
     {
         private bool status;
-        private DateTime timestamp;
+        private double unixtimestamp;
         private status1 status1;
 
-        public DataEntry(DateTime timestamp, bool status, status1 status1)
+        public DataEntry(double unixtimestamp, bool status, status1 status1)
         {
             this.status = status;
-            this.timestamp = timestamp;
+            this.unixtimestamp = unixtimestamp;
             this.status1 = status1;
         }
 
         public bool get_status() { return this.status; }
-        public DateTime get_timestamp() { return this.timestamp; }
+        public double get_unixtimestamp() { return this.unixtimestamp; }
         public status1 get_status1() { return this.status1; }
     }
 
@@ -101,6 +102,7 @@ namespace Prova
         {
 
             InitializeComponent();
+
 
             imgLogo.Source = createbitmapImage(@"C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\Rina2.bmp", 50);
 
@@ -140,7 +142,7 @@ namespace Prova
 
         }
 
-        void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object sender, EventArgs e)
         {
 
             Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
@@ -209,31 +211,82 @@ namespace Prova
         {
             Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
             Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
-            DataEntry[] samples = csvData["FREMM_F4"].ToArray();
+            List<DataEntry> samples = csvData["FREMM_F4"];
+            List<DataEntry> up = new();
+            List<DataEntry> down = new();
+            for (int i = 0; i < samples.Count; i++)
+            {
+                if (samples[i].get_status())
+                {
+                    up.Add(samples[i]);
+                    down.Add(null);
+                    if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { up.Add(samples[i + 1]); };
+                }
+                else
+                {
+                    down.Add(samples[i]);
+                    up.Add(null);
+                    if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(samples[i + 1]); };
+                };
+
+            }
+
             CartesianChart grafico = new()
             {
+                Name = "FREMM",
                 Width = 800,
-                Height = 500,
+                MaxHeight = 200,
                 Series = new[]
                 {
-                new ColumnSeries<DataEntry>
+                    new StepLineSeries<DataEntry>()
                     {
-                    Values = samples,
-                    MaxBarWidth = double.MaxValue,
-                    Padding = 0,
-                    Mapping = (sample, chartPoint) =>
+                        Values = up,
+                        Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 4 },
+                        GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
+                        Mapping = (sample, chartPoint) =>
                         {
 
-                        chartPoint.PrimaryValue = (double)sample.get_status1();
-                        chartPoint.SecondaryValue = chartPoint.Index;
-                        if (sample.get_status() == true) {chartPoint.Fill = SKColors.Green; }
-                        else {chartPoint.Fill = SKColors.Red; }
+                        chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
+                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
                         }
+
+                    },
+                    new StepLineSeries<DataEntry>()
+                    {
+                        Values = down,
+                        Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 4 },
+                        GeometryStroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 4 },
+                        Mapping = (sample, chartPoint) =>
+                        {
+
+                        chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
+                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
+                        }
+
                     }
-                },
-                XAxes = new[] { new Axis { Labeler = value => $"{value}" } },
-                YAxes = new[] { new Axis { Labels = new string[]
-                    { "FAILURE", "SHUTDOWN", "MAINTENANCE", "NOT_OPERATIVE", "OPERATIVE" } } }
+
+
+
+    /*
+    new ColumnSeries<DataEntry>
+        {
+        Values = samples,
+        MaxBarWidth = double.MaxValue,
+        Padding = 0,
+        Mapping = (sample, chartPoint) =>
+            {
+
+            chartPoint.PrimaryValue = (double)sample.get_status1();
+            chartPoint.SecondaryValue = chartPoint.Index;
+            //if (sample.get_status() == true) {chartPoint.Fill = SKColors.Green; }
+            //else {chartPoint.Fill = SKColors.Red; }
+            }
+        } */
+
+
+},
+                XAxes = new[] { new Axis { Labeler = value => $"{value}" + "s" } },
+                YAxes = new[] { new Axis { Labels = new string[] { "DOWN", "UP" } } }
 
 
             };
@@ -249,6 +302,7 @@ namespace Prova
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
+
         private void Import_CSV(string filePath, out Dictionary<string, List<DataEntry>> csvData)
         {
             try
@@ -295,7 +349,7 @@ namespace Prova
                             status1 = (status1)1;
                             break;
                     }
-                    DataEntry data = new DataEntry(UnixTimeStampToDateTime(Double.Parse(splittedLine[1])), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
+                    DataEntry data = new DataEntry(Double.Parse(splittedLine[1]), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
                     if (!csvData.ContainsKey(splittedLine[0]))
                     {
                         List<DataEntry> list = new List<DataEntry> { data };
