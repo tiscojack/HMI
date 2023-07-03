@@ -91,15 +91,11 @@ namespace Prova
         public Status1 get_status1() { return this.status1; }
     }
 
-    
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         bool demo = false;
-        //static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
-        static string csvPath = "C:\\Progetti\\Osn\\OAMD\\Codice\\OAMDSW\\AOMDHMI\\HMI\\resources\\prova.csv";
+        static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
+        //static string csvPath = "C:\\Progetti\\Osn\\OAMD\\Codice\\OAMDSW\\AOMDHMI\\HMI\\resources\\prova.csv";
         FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
         int selectedItemIndex = -1;
@@ -111,8 +107,8 @@ namespace Prova
             /*Aggiunta da GPO per impedire minimizzazione*/
             //fullMan.PreventClose(MainWindowOAMD);
 
-            //imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
-            imgLogo.Source = createbitmapImage(@"C:\Progetti\Osn\OAMD\Codice\OAMDSW\AOMDHMI\HMI\resources\Rina2.bmp", 50);
+            imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
+            //imgLogo.Source = createbitmapImage(@"C:\Progetti\Osn\OAMD\Codice\OAMDSW\AOMDHMI\HMI\resources\Rina2.bmp", 50);
 
             DispatcherTimer timer = new()
             {
@@ -190,25 +186,13 @@ namespace Prova
                 {
                     throw new Exception("There are some issue with the csv" + ex.Message);
                 }
-
-                
             }
-            
 
             try
             {
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     Status1 status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status1();
-
-                    /*
-                    IEnumerable<XElement> matches = xDoc.Root
-                          .Descendants("child")
-                          .Where(el => (string)el.Attribute("sys") == (string)mybutton.Content);
-
-                    if (matches.Any() == false) return;
-                    string status = (string)matches.First().Attribute("status").Value;
-                    */
 
                     mybutton.Background = status switch
                     {
@@ -263,9 +247,7 @@ namespace Prova
                                 up.Add(null);
                                 if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); up.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); };
                             };
-
                         }
-
                         CartesianChart grafico = new()
                         {
                             Width = 400,
@@ -312,8 +294,6 @@ namespace Prova
                 MessageBox.Show(ex.ToString());
                 return;
             }
-
-
         }
 
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
@@ -374,15 +354,12 @@ namespace Prova
                 throw new Exception("There are some issue with the csv" + ex.Message);
             }
         }
-
-
         //This function is called recursively until all nodes are loaded
         private void AddTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
         {
             XmlNode xNode;
             TreeViewItem tNode;
             XmlNodeList xNodeList;
-            //var csv = new StringBuilder();
             if (xmlNode.HasChildNodes) //The current node has children
             {
                 xNodeList = xmlNode.ChildNodes;
@@ -396,18 +373,6 @@ namespace Prova
                     var sys = xNode.Attributes["sys"].Value.ToString();
                     var sbc = xNode.Attributes["SBC"].Value.ToString();
 
-                    /*
-                    var status = xNode.Attributes["status"].Value.ToString();
-                    var status1 = xNode.Attributes["status1"].Value.ToString();
-                    for (int i = 0; i <= 10; i++)
-                    {
-                        var timestamp = 1687170643 + i * 5;
-                        var newLine = $"{sbc},{timestamp},{status},{status1}";
-                        csv.AppendLine(newLine);
-                    }
-                    */
-
-
                     nuovoNodo.Header = sys;
                     nuovoNodo.Tag = sbc;
 
@@ -417,7 +382,6 @@ namespace Prova
                     AddTreeNode(xNode, tNode);
                 }
             }
-            //File.AppendAllText("C:\\Users\\S_GT011\\Documents\\OAMD/prova.csv", csv.ToString());
         }
 
         private void Tv_MouseUp(object sender, MouseButtonEventArgs e)
@@ -469,15 +433,6 @@ namespace Prova
             Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
             Import_CSV(csvPath, out csvData);
             Status1 status = csvData[(string)tag].Last().get_status1();
-            /*
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
-
-            IEnumerable<XElement> matches = xDoc.Root
-                      .Descendants("child")
-                      .Where(el => (string)el.Attribute("SBC") == (string)tag);
-
-            string status = (string)matches.First().Attribute("status").Value;
-            */
 
             mybutton.Background = status switch
             {
@@ -539,7 +494,6 @@ namespace Prova
             BitmapImage bitmapImage = new();
             bitmapImage.BeginInit();
             bitmapImage.UriSource = new Uri(P);
-            //bitmapImage.DecodePixelWidth = w;
             bitmapImage.DecodePixelHeight = h;
             bitmapImage.EndInit();
 
