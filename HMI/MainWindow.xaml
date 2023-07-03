@@ -11,9 +11,10 @@
     SizeToContent="Manual"
     WindowState="Maximized"
     mc:Ignorable="d">
+    
     <Window.Resources>
-        <Image x:Key="ita" Source="C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\ita.jpg"/>
-        <Image x:Key="uk" Source="C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\uk.jpg"/>
+        <Image x:Key="ita" Source="C:\Users\s_ls015\source\repos\HMI\HMI\resources\ita.jpg"/>
+        <Image x:Key="uk" Source="C:\Users\s_ls015\source\repos\HMI\HMI\resources\uk.jpg"/>
     </Window.Resources>
     <Grid>
         
@@ -34,7 +35,7 @@
             <RowDefinition Height="1"></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
             </Grid.RowDefinitions>
-            
+
             <Image HorizontalAlignment="Left" VerticalAlignment="Center" Name="imgLogo" Grid.Column="0" Grid.Row="0" Margin="20,10"/>
             <Canvas Grid.Row="1" Background="White"/>
             <Button Grid.Row="2" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Click="LanguageButton_Click" Name="LanguageButton" Background="#0D1D35" Height="25" Width="35" HorizontalAlignment ="Right" Margin="110, 0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
@@ -63,9 +64,22 @@
         </Grid>
 
         <DockPanel x:Name="leftDocPanel" Grid.Row="1" Background="#C2D4F0">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
-                <StackPanel>
-                    <TextBox x:Name="txtSearch" Background="#C2D4F0" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="true">
+                <Button Click="searchresultsbuttonUp_Click" DockPanel.Dock="Right">
+                    <Button.Content>
+                        <Path Data="M 0 6 L 12 6 L 6 0 Z" 
+                              Fill="Black"/>
+                    </Button.Content>
+                </Button>
+                <Button Click="searchresultsbuttonDown_Click" DockPanel.Dock="Right">
+                    <Button.Content>
+                        <Path Data="M 0 0 L 6 6 L 12 0 Z" 
+                              Fill="Black"/>
+                    </Button.Content>
+                </Button>
+                <TextBox x:Name="txtSearch" Background="#C2D4F0" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
+            </DockPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent" HorizontalScrollBarVisibility="Auto">
                 <TreeView
                     BorderThickness="0"
                     Name="dirTree"
@@ -82,7 +96,6 @@
                     </TreeView.ItemContainerStyle>
                 </TreeView>
             
-            </StackPanel>
             </ScrollViewer>
         </DockPanel>
             <GridSplitter
@@ -92,7 +105,7 @@
                 HorizontalAlignment="Stretch" />
         <DockPanel x:Name="rightDocPanel" Grid.Column="2" Grid.Row="1">
             <ScrollViewer>
-                <DockPanel 
+                <UniformGrid 
                     x:Name="DocPanel"
                     Grid.Column="2"
                     Background="#F5F5F5"
@@ -103,7 +116,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         ItemWidth="170" />
-                </DockPanel>
+                </UniformGrid>
             </ScrollViewer>
         </DockPanel>
 

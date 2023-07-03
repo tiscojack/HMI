@@ -17,6 +17,7 @@ using System.Xml;
 using Path = System.IO.Path;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
+using HMI;
 
 namespace Prova
 {
@@ -67,9 +68,9 @@ namespace Prova
     public enum status1
     {
         FAILURE,
-        SHUTDOWN,
+        DEGRADED,
         MAINTENANCE,
-        NOT_OPERATIVE,
+        UNKNOWN,
         OPERATIVE
     }
 
@@ -98,14 +99,19 @@ namespace Prova
     public partial class MainWindow : Window
     {
         bool demo = false;
+        FullScreenManager fullMan = new FullScreenManager();
+        List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
+        int selectedItemIndex = -1;
 
         public MainWindow()
         {
 
             InitializeComponent();
+            /*Aggiunta da GPO per impedire minimizzazione*/
+            //fullMan.PreventClose(MainWindowOAMD);
 
 
-            imgLogo.Source = createbitmapImage(@"C:\Users\S_GT011\source\repos\HMIfinal\HMI\resources\Rina2.bmp", 50);
+            imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
 
             DispatcherTimer timer = new()
             {
@@ -147,10 +153,9 @@ namespace Prova
         {
 
             Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-            Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
+            Import_CSV("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv", out csvData);
 
             /*
-            XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
             if (demo)
             {
                 IEnumerable<XElement> matches = xDoc.Root
@@ -170,7 +175,7 @@ namespace Prova
             {
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
-                    bool status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status();
+                    status1 status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status1();
 
                     /*
                     IEnumerable<XElement> matches = xDoc.Root
@@ -181,21 +186,15 @@ namespace Prova
                     string status = (string)matches.First().Attribute("status").Value;
                     */
 
-
-
-                    if (status == true)
+                    mybutton.Background = status switch
                     {
-                        mybutton.Background = Brushes.Green;
-                    }
-                    else if (status == false)
-                    {
-                        mybutton.Background = Brushes.Red;
-                    }
-                    else
-                    {
-                        mybutton.Background = Brushes.White;
-                    }
-
+                        (status1)0 => Brushes.Red,
+                        (status1)1 => Brushes.Yellow,
+                        (status1)2 => Brushes.Brown,
+                        (status1)3 => Brushes.White,
+                        (status1)4 => Brushes.Green,
+                        _ => Brushes.Gray,
+                    };
                 }
             }
             catch { return; };
@@ -215,7 +214,7 @@ namespace Prova
             try
             {
                 Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-                Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
+                Import_CSV("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv", out csvData);
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -328,20 +327,20 @@ namespace Prova
                         case "OPERATIVE":
                             status1 = (status1)4;
                             break;
-                        case "NOT_OPERATIVE":
+                        case "UNKNOWN":
                             status1 = (status1)3;
                             break;
                         case "MAINTENANCE":
                             status1 = (status1)2;
                             break;
-                        case "SHUTDOWN":
+                        case "DEGRADED":
                             status1 = (status1)1;
                             break;
                         case "FAILURE":
                             status1 = (status1)0;
                             break;
                         default:
-                            status1 = (status1)1;
+                            status1 = (status1)3;
                             break;
                     }
                     DataEntry data = new DataEntry(Double.Parse(splittedLine[1]), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
@@ -409,16 +408,21 @@ namespace Prova
 
         private void Tv_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            selectTreeViewItem(sender);
+        }
+
+        private void selectTreeViewItem(object send)
+        {
             TreeView treeView;
             TreeViewItem item;
             if (DocPanel.Children.Count >= 2)
             {
-                DocPanel.Children.RemoveRange(1,DocPanel.Children.Count);
+                DocPanel.Children.RemoveAt(1);
             }
-            if (sender != null)
+            if (send != null)
             {
                 Wrap.Children.Clear();
-                treeView = (TreeView)sender;
+                treeView = (TreeView)send;
 
                 item = (TreeViewItem)(treeView.SelectedItem);
                 if (item != null)
@@ -449,8 +453,8 @@ namespace Prova
             };
 
             Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-            Import_CSV("C:\\Users\\S_GT011\\Documents\\OAMD\\prova.csv", out csvData);
-            bool status = csvData[(string)tag].Last().get_status();
+            Import_CSV("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv", out csvData);
+            status1 status = csvData[(string)tag].Last().get_status1();
             /*
             XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
@@ -461,18 +465,15 @@ namespace Prova
             string status = (string)matches.First().Attribute("status").Value;
             */
 
-            if (status == true)
+            mybutton.Background = status switch
             {
-                mybutton.Background = Brushes.Green;
-            }
-            else if (status == false)
-            {
-                mybutton.Background = Brushes.Red;
-            }
-            else
-            {
-                mybutton.Background = Brushes.White;
-            }
+                (status1)0 => Brushes.Red,
+                (status1)1 => Brushes.Yellow,
+                (status1)2 => Brushes.Brown,
+                (status1)3 => Brushes.White,
+                (status1)4 => Brushes.Green,
+                _ => Brushes.Gray,
+            };
             ToolTip tooltip = new()
             {
                 Content = (string)tag
@@ -485,6 +486,8 @@ namespace Prova
         {
             if (dirTree.Items.Count > 0)
             {
+                selectedItemList.Clear();
+                selectedItemIndex = -1;
                 for (int i = 0; i < dirTree.Items.Count; i++)
                 {
                     ExpandTreeItem((TreeViewItem)dirTree.Items[i]);
@@ -495,16 +498,26 @@ namespace Prova
         private void ExpandTreeItem(TreeViewItem item)
         {
             string text;
-            item.Foreground = Brushes.Black;
-            item.SetValue(TreeViewItem.IsExpandedProperty, true);
-            text = txtSearch.Text.ToLower();
             string sItem = (string)item.Header;
+            TreeViewItem tmpItem = null;
+
+            item.Foreground = Brushes.Black;
+            text = txtSearch.Text.ToLower();
             if (!text.Equals(string.Empty) && sItem.ToLower().Contains(text))
             {
-                item.Foreground = Brushes.Red;
+                tmpItem = item.Parent as TreeViewItem;
+                while (tmpItem != null)
+                {
+                    tmpItem.Parent.SetValue(TreeViewItem.IsExpandedProperty, true);
+                    item.Parent.SetValue(TreeViewItem.IsExpandedProperty, true);
+                    tmpItem = tmpItem.Parent as TreeViewItem;
+                }
+                item.Foreground = Brushes.White;
+                selectedItemList.Add(item);
             }
             for (int i = 0; i < item.Items.Count; i++)
             {
+                ((TreeViewItem)item.Items[i]).SetValue(TreeViewItem.IsExpandedProperty, false);
                 ExpandTreeItem((TreeViewItem)item.Items[i]);
             }
         }
@@ -519,6 +532,42 @@ namespace Prova
             bitmapImage.EndInit();
 
             return bitmapImage;
+        }
+
+        /*Aggiunta da GPO per impedire minimizzazione*/
+        private async void MainWindowOAMD_StateChanged(object sender, EventArgs e)
+        {
+            //await fullMan.MaximizeWindow(this);
+        }
+
+        private void searchresultsbuttonDown_Click(object sender, RoutedEventArgs e)
+        {
+            int selectedItems = selectedItemList.Count;
+            if (selectedItemList.Count > 0)
+            {
+                selectedItemIndex++;
+                if (selectedItemIndex == selectedItems)
+                {
+                    selectedItemIndex = 0;
+                }
+                selectedItemList[selectedItemIndex].IsSelected = true;
+                selectTreeViewItem((object)dirTree);
+            }
+        }
+
+        private void searchresultsbuttonUp_Click(object sender, RoutedEventArgs e)
+        {
+            int selectedItems = selectedItemList.Count;
+            if (selectedItemList.Count > 0)
+            {
+                selectedItemIndex--;
+                if (selectedItemIndex <= -1)
+                {
+                    selectedItemIndex = selectedItems - 1;
+                }
+                selectedItemList[selectedItemIndex].IsSelected = true;
+                selectTreeViewItem((object)dirTree);
+            }
         }
     }
 }
