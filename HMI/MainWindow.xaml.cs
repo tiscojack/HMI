@@ -98,7 +98,8 @@ namespace Prova
     public partial class MainWindow : Window
     {
         bool demo = false;
-        static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
+        //static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
+        static string csvPath = "C:\\Progetti\\Osn\\OAMD\\Codice\\OAMDSW\\AOMDHMI\\HMI\\resources\\prova.csv";
         FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
         int selectedItemIndex = -1;
@@ -110,8 +111,8 @@ namespace Prova
             /*Aggiunta da GPO per impedire minimizzazione*/
             //fullMan.PreventClose(MainWindowOAMD);
 
-
-            imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
+            //imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
+            imgLogo.Source = createbitmapImage(@"C:\Progetti\Osn\OAMD\Codice\OAMDSW\AOMDHMI\HMI\resources\Rina2.bmp", 50);
 
             DispatcherTimer timer = new()
             {
@@ -230,11 +231,16 @@ namespace Prova
 
         }
 
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
+
         private void Preview_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                Dictionary<string, List<DataEntry>> csvData = new();
+                Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
                 Import_CSV(csvPath, out csvData);
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
@@ -459,8 +465,9 @@ namespace Prova
                 Margin = new Thickness(10, 20, 10, 20),
                 MinHeight = 30,
             };
-            _ = new Dictionary<string, List<DataEntry>>();
-            Import_CSV(csvPath, out Dictionary<string, List<DataEntry>> csvData);
+
+            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+            Import_CSV(csvPath, out csvData);
             Status1 status = csvData[(string)tag].Last().get_status1();
             /*
             XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
