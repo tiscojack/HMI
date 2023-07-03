@@ -417,7 +417,7 @@ namespace Prova
             TreeViewItem item;
             if (DocPanel.Children.Count >= 2)
             {
-                DocPanel.Children.RemoveAt(1);
+                DocPanel.Children.RemoveRange(1, DocPanel.Children.Count);
             }
             if (send != null)
             {
