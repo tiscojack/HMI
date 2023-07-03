@@ -19,6 +19,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
 using HMI;
 using System.Text;
+using System.Windows.Media.Animation;
 
 namespace Prova
 {
@@ -96,7 +97,7 @@ namespace Prova
         bool demo = false;
         static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
         //static string csvPath = "C:\\Progetti\\Osn\\OAMD\\Codice\\OAMDSW\\AOMDHMI\\HMI\\resources\\prova.csv";
-        FullScreenManager fullMan = new FullScreenManager();
+        //FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
         int selectedItemIndex = -1;
 
@@ -107,7 +108,7 @@ namespace Prova
             /*Aggiunta da GPO per impedire minimizzazione*/
             //fullMan.PreventClose(MainWindowOAMD);
 
-            imgLogo.Source = createbitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
+            imgLogo.Source = CreatebitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
             //imgLogo.Source = createbitmapImage(@"C:\Progetti\Osn\OAMD\Codice\OAMDSW\AOMDHMI\HMI\resources\Rina2.bmp", 50);
 
             DispatcherTimer timer = new()
@@ -386,10 +387,10 @@ namespace Prova
 
         private void Tv_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            selectTreeViewItem(sender);
+            SelectTreeViewItem(sender);
         }
 
-        private void selectTreeViewItem(object send)
+        private void SelectTreeViewItem(object send)
         {
             TreeView treeView;
             TreeViewItem item;
@@ -427,10 +428,10 @@ namespace Prova
             {
                 Content = header,
                 Margin = new Thickness(10, 20, 10, 20),
-                MinHeight = 30,
+                MinHeight = 30
             };
-
-            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+            
+            Dictionary<string, List<DataEntry>> csvData = new();
             Import_CSV(csvPath, out csvData);
             Status1 status = csvData[(string)tag].Last().get_status1();
 
@@ -448,7 +449,39 @@ namespace Prova
                 Content = (string)tag
             };
             mybutton.ToolTip = tooltip;
+            mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
+            mybutton.Style = (Style)Resources["button"];
             Wrap.Children.Add(mybutton);
+        }
+        private void DoubleClick(object sender, RoutedEventArgs e)
+        {
+            ToggleButton button = (ToggleButton)sender;
+
+            for (int i = 0; i < dirTree.Items.Count; i++)
+            {
+                LookForTvItem((TreeViewItem)dirTree.Items[i], (string)button.Content);
+            }
+            SelectTreeViewItem(dirTree);
+        }
+
+        private void LookForTvItem(TreeViewItem item, string text)
+        {
+            string sItem = (string)item.Header;
+            if (!text.Equals(string.Empty) && sItem.Equals(text))
+            {
+                item.IsSelected = true;
+                TreeViewItem tmpItem = item.Parent as TreeViewItem;
+                while (tmpItem != null)
+                {
+                    tmpItem.Parent.SetValue(TreeViewItem.IsExpandedProperty, true);
+                    item.Parent.SetValue(TreeViewItem.IsExpandedProperty, true);
+                    tmpItem = tmpItem.Parent as TreeViewItem;
+                }
+            }
+            for (int i = 0; i < item.Items.Count; i++)
+            {
+                LookForTvItem((TreeViewItem)item.Items[i], text);
+            }
         }
 
         private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -489,7 +522,7 @@ namespace Prova
             }
         }
 
-        public static BitmapImage createbitmapImage(string P, int h)
+        public static BitmapImage CreatebitmapImage(string P, int h)
         {
             BitmapImage bitmapImage = new();
             bitmapImage.BeginInit();
@@ -506,7 +539,7 @@ namespace Prova
             //await fullMan.MaximizeWindow(this);
         }
 
-        private void searchresultsbuttonDown_Click(object sender, RoutedEventArgs e)
+        private void SearchresultsbuttonDown_Click(object sender, RoutedEventArgs e)
         {
             int selectedItems = selectedItemList.Count;
             if (selectedItemList.Count > 0)
@@ -517,11 +550,11 @@ namespace Prova
                     selectedItemIndex = 0;
                 }
                 selectedItemList[selectedItemIndex].IsSelected = true;
-                selectTreeViewItem((object)dirTree);
+                SelectTreeViewItem((object)dirTree);
             }
         }
 
-        private void searchresultsbuttonUp_Click(object sender, RoutedEventArgs e)
+        private void SearchresultsbuttonUp_Click(object sender, RoutedEventArgs e)
         {
             int selectedItems = selectedItemList.Count;
             if (selectedItemList.Count > 0)
@@ -532,7 +565,7 @@ namespace Prova
                     selectedItemIndex = selectedItems - 1;
                 }
                 selectedItemList[selectedItemIndex].IsSelected = true;
-                selectTreeViewItem((object)dirTree);
+                SelectTreeViewItem((object)dirTree);
             }
         }
     }

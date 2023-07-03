@@ -10,10 +10,12 @@
     Title="RINA HMI"
     WindowState="Maximized"
     mc:Ignorable="d" StateChanged="MainWindowOAMD_StateChanged" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" WindowStyle="None">
+
     <Window.Resources>
         <Image x:Key="ita" Source="C:\Users\s_ls015\source\repos\HMI\HMI\resources\ita.jpg"/>
         <Image x:Key="uk" Source="C:\Users\s_ls015\source\repos\HMI\HMI\resources\uk.jpg"/>
     </Window.Resources>
+    
     <Grid>
         
         <Grid.ColumnDefinitions>
@@ -65,13 +67,13 @@
 
         <DockPanel x:Name="leftDocPanel" Grid.Row="1" Background="#C2D4F0">
             <DockPanel DockPanel.Dock="Top" LastChildFill="true">
-                <Button Click="searchresultsbuttonUp_Click" DockPanel.Dock="Right">
+                <Button Click="SearchresultsbuttonUp_Click" DockPanel.Dock="Right">
                     <Button.Content>
                         <Path Data="M 0 6 L 12 6 L 6 0 Z" 
                               Fill="Black"/>
                     </Button.Content>
                 </Button>
-                <Button Click="searchresultsbuttonDown_Click" DockPanel.Dock="Right">
+                <Button Click="SearchresultsbuttonDown_Click" DockPanel.Dock="Right">
                     <Button.Content>
                         <Path Data="M 0 0 L 6 6 L 12 0 Z" 
                               Fill="Black"/>
