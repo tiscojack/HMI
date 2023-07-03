@@ -18,6 +18,7 @@ using Path = System.IO.Path;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
 using HMI;
+using System.Text;
 
 namespace Prova
 {
@@ -33,8 +34,7 @@ namespace Prova
 
         void AssociatedObject_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            Button source = sender as Button;
-            if (source != null && source.ContextMenu != null)
+            if (sender is Button source && source.ContextMenu != null)
             {
                 if (!isContextMenuOpen)
                 {
@@ -58,14 +58,13 @@ namespace Prova
         void ContextMenu_Closed(object sender, RoutedEventArgs e)
         {
             isContextMenuOpen = false;
-            var contextMenu = sender as ContextMenu;
-            if (contextMenu != null)
+            if (sender is ContextMenu contextMenu)
             {
                 contextMenu.RemoveHandler(ContextMenu.ClosedEvent, new RoutedEventHandler(ContextMenu_Closed));
             }
         }
     }
-    public enum status1
+    public enum Status1
     {
         FAILURE,
         DEGRADED,
@@ -78,9 +77,9 @@ namespace Prova
     {
         private bool status;
         private double unixtimestamp;
-        private status1 status1;
+        private Status1 status1;
 
-        public DataEntry(double unixtimestamp, bool status, status1 status1)
+        public DataEntry(double unixtimestamp, bool status, Status1 status1)
         {
             this.status = status;
             this.unixtimestamp = unixtimestamp;
@@ -89,16 +88,17 @@ namespace Prova
 
         public bool get_status() { return this.status; }
         public double get_unixtimestamp() { return this.unixtimestamp; }
-        public status1 get_status1() { return this.status1; }
+        public Status1 get_status1() { return this.status1; }
     }
 
-
+    
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         bool demo = false;
+        static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
         FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
         int selectedItemIndex = -1;
@@ -151,31 +151,54 @@ namespace Prova
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-
-            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-            Import_CSV("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv", out csvData);
-
-            /*
+            _ = new Dictionary<string, List<DataEntry>>();
+            Import_CSV(csvPath, out Dictionary<string, List<DataEntry>> csvData);
             if (demo)
             {
-                IEnumerable<XElement> matches = xDoc.Root
-                      .Descendants("child");
-                foreach (XElement el in matches)
+                try
                 {
-                    Random rand = new Random();
-                    int _salt = rand.Next();
-                    el.Attribute("status").Value = (_salt % 2).ToString();
-                    el.Attribute("status1").Value = (string)status[_salt % 5];
+                    if (!File.Exists(csvPath))
+                    {
+                        MessageBox.Show(String.Format("The selected file doesn't exist"), "R+G Management", MessageBoxButton.OK, MessageBoxImage.Error);
+                        csvData = null;
+                        return;
+                    }
+                    
+                    StreamReader sR = new(new FileStream(csvPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    string allFile = sR.ReadToEnd();
+                    sR.Close();
+                    var lines = allFile.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                    var csv = new StringBuilder();
+
+                    string line;
+                    int i = 0;
+                    while (i < lines.Length)
+                    {
+                        line = lines[i++];
+                        var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        Random rand = new Random();
+                        int _salt = rand.Next();
+
+                        var newLine = $"{splittedLine[0]},{splittedLine[1]},{_salt % 2},{(Status1)(_salt % 5)}";
+                        csv.AppendLine(newLine);
+                    }
+                    File.WriteAllText(csvPath, csv.ToString());
                 }
-                xDoc.Save("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
+                catch (Exception ex)
+                {
+                    throw new Exception("There are some issue with the csv" + ex.Message);
+                }
+
+                
             }
-            */
+            
 
             try
             {
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
-                    status1 status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status1();
+                    Status1 status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status1();
 
                     /*
                     IEnumerable<XElement> matches = xDoc.Root
@@ -188,18 +211,16 @@ namespace Prova
 
                     mybutton.Background = status switch
                     {
-                        (status1)0 => Brushes.Red,
-                        (status1)1 => Brushes.Yellow,
-                        (status1)2 => Brushes.Brown,
-                        (status1)3 => Brushes.White,
-                        (status1)4 => Brushes.Green,
+                        (Status1)0 => Brushes.Red,
+                        (Status1)1 => Brushes.Yellow,
+                        (Status1)2 => Brushes.Brown,
+                        (Status1)3 => Brushes.White,
+                        (Status1)4 => Brushes.Green,
                         _ => Brushes.Gray,
                     };
                 }
             }
             catch { return; };
-
-
         }
 
 
@@ -213,8 +234,8 @@ namespace Prova
         {
             try
             {
-                Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-                Import_CSV("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv", out csvData);
+                Dictionary<string, List<DataEntry>> csvData = new();
+                Import_CSV(csvPath, out csvData);
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -310,7 +331,7 @@ namespace Prova
                     return;
                 }
                 csvData = new Dictionary<string, List<DataEntry>>();
-                StreamReader sR = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                StreamReader sR = new(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 string allFile = sR.ReadToEnd();
                 sR.Close();
                 var lines = allFile.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -321,32 +342,19 @@ namespace Prova
                 {
                     line = lines[i++];
                     var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    status1 status1;
-                    switch (splittedLine[3])
+                    var status1 = splittedLine[3] switch
                     {
-                        case "OPERATIVE":
-                            status1 = (status1)4;
-                            break;
-                        case "UNKNOWN":
-                            status1 = (status1)3;
-                            break;
-                        case "MAINTENANCE":
-                            status1 = (status1)2;
-                            break;
-                        case "DEGRADED":
-                            status1 = (status1)1;
-                            break;
-                        case "FAILURE":
-                            status1 = (status1)0;
-                            break;
-                        default:
-                            status1 = (status1)3;
-                            break;
-                    }
+                        "OPERATIVE" => (Status1)4,
+                        "UNKNOWN" => (Status1)3,
+                        "MAINTENANCE" => (Status1)2,
+                        "DEGRADED" => (Status1)1,
+                        "FAILURE" => (Status1)0,
+                        _ => (Status1)3,
+                    };
                     DataEntry data = new DataEntry(Double.Parse(splittedLine[1]), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
                     if (!csvData.ContainsKey(splittedLine[0]))
                     {
-                        List<DataEntry> list = new List<DataEntry> { data };
+                        List<DataEntry> list = new() { data };
                         csvData.Add(splittedLine[0], list);
                     }
                     else
@@ -451,10 +459,9 @@ namespace Prova
                 Margin = new Thickness(10, 20, 10, 20),
                 MinHeight = 30,
             };
-
-            Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
-            Import_CSV("C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv", out csvData);
-            status1 status = csvData[(string)tag].Last().get_status1();
+            _ = new Dictionary<string, List<DataEntry>>();
+            Import_CSV(csvPath, out Dictionary<string, List<DataEntry>> csvData);
+            Status1 status = csvData[(string)tag].Last().get_status1();
             /*
             XDocument xDoc = XDocument.Load("C:\\Users\\S_GT011\\Documents\\OAMD/alberoFREMM_GP_ASW_Completo.xml");
 
@@ -467,11 +474,11 @@ namespace Prova
 
             mybutton.Background = status switch
             {
-                (status1)0 => Brushes.Red,
-                (status1)1 => Brushes.Yellow,
-                (status1)2 => Brushes.Brown,
-                (status1)3 => Brushes.White,
-                (status1)4 => Brushes.Green,
+                (Status1)0 => Brushes.Red,
+                (Status1)1 => Brushes.Yellow,
+                (Status1)2 => Brushes.Brown,
+                (Status1)3 => Brushes.White,
+                (Status1)4 => Brushes.Green,
                 _ => Brushes.Gray,
             };
             ToolTip tooltip = new()
@@ -499,13 +506,11 @@ namespace Prova
         {
             string text;
             string sItem = (string)item.Header;
-            TreeViewItem tmpItem = null;
-
             item.Foreground = Brushes.Black;
             text = txtSearch.Text.ToLower();
             if (!text.Equals(string.Empty) && sItem.ToLower().Contains(text))
             {
-                tmpItem = item.Parent as TreeViewItem;
+                TreeViewItem tmpItem = item.Parent as TreeViewItem;
                 while (tmpItem != null)
                 {
                     tmpItem.Parent.SetValue(TreeViewItem.IsExpandedProperty, true);
@@ -524,7 +529,7 @@ namespace Prova
 
         public static BitmapImage createbitmapImage(string P, int h)
         {
-            BitmapImage bitmapImage = new BitmapImage();
+            BitmapImage bitmapImage = new();
             bitmapImage.BeginInit();
             bitmapImage.UriSource = new Uri(P);
             //bitmapImage.DecodePixelWidth = w;
