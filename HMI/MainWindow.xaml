@@ -106,7 +106,7 @@
                 Width="5"
                 HorizontalAlignment="Stretch" />
         <DockPanel x:Name="rightDocPanel" Grid.Column="2" Grid.Row="1">
-            <ScrollViewer>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
                 <UniformGrid 
                     x:Name="DocPanel"
                     Grid.Column="2"

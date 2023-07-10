@@ -20,6 +20,7 @@ using LiveChartsCore.SkiaSharpView.WPF;
 using HMI;
 using System.Text;
 using System.Windows.Media.Animation;
+using System.Diagnostics.Metrics;
 
 namespace Prova
 {
@@ -224,8 +225,14 @@ namespace Prova
         {
             try
             {
+                int tabcounter = 0;
                 Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
                 Import_CSV(csvPath, out csvData);
+                TabControl tab = new() {  };
+                rightDocPanel.Children.Add(tab);
+                List<UniformGrid> grid = new();
+                
+                List<TabItem> ti = new();
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -251,7 +258,7 @@ namespace Prova
                         CartesianChart grafico = new()
                         {
                             Width = 400,
-                            MaxHeight = 200,
+                            MaxHeight = 150,
                             TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden,
                             Series = new[]
                             {
@@ -279,13 +286,21 @@ namespace Prova
 
                                 }
                             },
-                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 2.5},  },
+                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 4},  },
                             YAxes = new List<Axis> { new Axis { Labels = new string[] { "DOWN", "UP" } } }
                         };
-                        
-                        DocPanel.Children.Add(grafico);
+                        if (tabcounter % 9 == 0) { grid.Add(new UniformGrid() {Rows = 3 }); }
+                        grid[tabcounter / 9].Children.Add(grafico);
+                        tabcounter++;
                     }
                 }
+                for (int i = 0; i <= (tabcounter-1) / 9; i++) {
+                    ti.Add(new TabItem());
+                    ti[i].Content = grid[i];
+                    ti[i].Header = String.Format("Tab {0}", i);
+                    tab.Items.Insert(i, ti[i]);
+                }
+
                 Wrap.Children.Clear();
 
             }
@@ -393,9 +408,9 @@ namespace Prova
         {
             TreeView treeView;
             TreeViewItem item;
-            if (DocPanel.Children.Count >= 2)
+            if (rightDocPanel.Children.Count >= 2)
             {
-                DocPanel.Children.RemoveRange(1, DocPanel.Children.Count);
+                rightDocPanel.Children.RemoveRange(1, rightDocPanel.Children.Count);
             }
             if (send != null)
             {
