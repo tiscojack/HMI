@@ -22,6 +22,8 @@ using System.Text;
 using System.Windows.Media.Animation;
 using System.Diagnostics.Metrics;
 using LiveChartsCore.Drawing;
+using LiveChartsCore.Measure;
+using System.Diagnostics;
 
 namespace Prova
 {
@@ -229,9 +231,10 @@ namespace Prova
                 int tabcounter = 0;
                 Dictionary<string, List<DataEntry>> csvData = new();
                 Import_CSV(csvPath, out csvData);
-                TabControl tab = new() { };
+                TabControl tab = new();
                 rightDocPanel.Children.Add(tab);
-                List<UniformGrid> grid = new();
+                List<StackPanel> panel = new();
+                List<ScrollViewer> sv = new();
                 
                 List<TabItem> ti = new();
                 foreach (ToggleButton mybutton in Wrap.Children)
@@ -259,8 +262,9 @@ namespace Prova
                         CartesianChart grafico = new()
                         {
                             Width = 350,
-                            MaxHeight = 150,
+                            Height = 150,
                             TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden,
+                            HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
                                 new StepLineSeries<DataEntry>()
@@ -290,14 +294,20 @@ namespace Prova
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 3.5},  },
                             YAxes = new List<Axis> { new Axis { Labels = new string[] { "DOWN", "UP" } } }
                         };
-                        if (tabcounter % 9 == 0) { grid.Add(new UniformGrid() {Rows = 3 }); }
-                        grid[tabcounter / 9].Children.Add(grafico);
+                        if (tabcounter % 10 == 0) 
+                        { 
+                            panel.Add(new StackPanel() {Orientation = Orientation.Vertical}); 
+                            sv.Add(new ScrollViewer() {VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+                        }
+                        panel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
                 }
-                for (int i = 0; i <= (tabcounter-1) / 9; i++) {
+                for (int i = 0; i <= (tabcounter-1) / 10; i++) {
                     ti.Add(new TabItem());
-                    ti[i].Content = grid[i];
+                    ti[i].Content = sv[i];
+                    sv[i].Content = panel[i];
+
                     ti[i].Header = String.Format("Tab {0}", i);
                     tab.Items.Insert(i, ti[i]);
                 }
@@ -439,13 +449,24 @@ namespace Prova
 
         private void AddToWrapPanel(object header, object tag)
         {
+            
             ToggleButton mybutton = new()
             {
-                Content = header,
                 Margin = new Thickness(10, 20, 10, 20),
-                MinHeight = 30
+                MinHeight = 30,
+                MaxHeight = 100,
+                MaxWidth = 300,
+                MinWidth = 100
             };
             
+            mybutton.Content = new TextBlock()
+            {
+                Name = "togglebuttonTextBlock",
+                Text = header.ToString().Replace("_", " "),
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap
+
+            };
             Dictionary<string, List<DataEntry>> csvData = new();
             Import_CSV(csvPath, out csvData);
             Status1 status = csvData[(string)tag].Last().get_status1();
@@ -474,7 +495,8 @@ namespace Prova
 
             for (int i = 0; i < dirTree.Items.Count; i++)
             {
-                LookForTvItem((TreeViewItem)dirTree.Items[i], (string)button.Content);
+                TextBlock tb = button.Content as TextBlock;
+                LookForTvItem((TreeViewItem)dirTree.Items[i], tb.Text.Replace(" ", "_"));
             }
             SelectTreeViewItem(dirTree);
         }
@@ -583,5 +605,7 @@ namespace Prova
                 SelectTreeViewItem((object)dirTree);
             }
         }
+        
+      
     }
 }
