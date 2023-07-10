@@ -12,8 +12,8 @@
     mc:Ignorable="d" StateChanged="MainWindowOAMD_StateChanged" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" WindowStyle="None">
 
     <Window.Resources>
-        <Image x:Key="ita" Source="C:\Users\s_ls015\source\repos\HMI\HMI\resources\ita.jpg"/>
-        <Image x:Key="uk" Source="C:\Users\s_ls015\source\repos\HMI\HMI\resources\uk.jpg"/>
+        <Image x:Key="ita" Source="resources\ita.jpg"/>
+        <Image x:Key="uk" Source="resources\uk.jpg"/>
     </Window.Resources>
     
     <Grid>
