@@ -21,6 +21,7 @@ using HMI;
 using System.Text;
 using System.Windows.Media.Animation;
 using System.Diagnostics.Metrics;
+using LiveChartsCore.Drawing;
 
 namespace Prova
 {
@@ -100,7 +101,7 @@ namespace Prova
         string csvPath = string.Format("{0}resources\\prova.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
         string imagePath = "pack://application:,,,/resources/Rina2.bmp";
         //FullScreenManager fullMan = new FullScreenManager();
-        List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
+        List<TreeViewItem> selectedItemList = new();
         int selectedItemIndex = -1;
 
         public MainWindow()
@@ -175,7 +176,7 @@ namespace Prova
                         line = lines[i++];
                         var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        Random rand = new Random();
+                        Random rand = new();
                         int _salt = rand.Next();
 
                         var newLine = $"{splittedLine[0]},{splittedLine[1]},{_salt % 2},{(Status1)(_salt % 5)}";
@@ -226,9 +227,9 @@ namespace Prova
             try
             {
                 int tabcounter = 0;
-                Dictionary<string, List<DataEntry>> csvData = new Dictionary<string, List<DataEntry>>();
+                Dictionary<string, List<DataEntry>> csvData = new();
                 Import_CSV(csvPath, out csvData);
-                TabControl tab = new() {  };
+                TabControl tab = new() { };
                 rightDocPanel.Children.Add(tab);
                 List<UniformGrid> grid = new();
                 
@@ -257,7 +258,7 @@ namespace Prova
                         }
                         CartesianChart grafico = new()
                         {
-                            Width = 400,
+                            Width = 350,
                             MaxHeight = 150,
                             TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden,
                             Series = new[]
@@ -286,7 +287,7 @@ namespace Prova
 
                                 }
                             },
-                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 4},  },
+                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 3.5},  },
                             YAxes = new List<Axis> { new Axis { Labels = new string[] { "DOWN", "UP" } } }
                         };
                         if (tabcounter % 9 == 0) { grid.Add(new UniformGrid() {Rows = 3 }); }
@@ -435,7 +436,12 @@ namespace Prova
                 }
             }
         }
+        private Storyboard SBMarquee;
+        private DoubleAnimation XAnimation;
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
 
+        }
         private void AddToWrapPanel(object header, object tag)
         {
             ToggleButton mybutton = new()
@@ -464,7 +470,10 @@ namespace Prova
             };
             mybutton.ToolTip = tooltip;
             mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
-            mybutton.Style = (Style)Resources["button"];
+            mybutton.Style = (Style)Resources["marquee"];
+            SBMarquee = this.Resources["SBmarquee"] as Storyboard;
+            XAnimation = SBMarquee.Children[0] as DoubleAnimation;
+            XAnimation.To = mybutton.ActualWidth * -1;
             Wrap.Children.Add(mybutton);
         }
         private void DoubleClick(object sender, RoutedEventArgs e)
