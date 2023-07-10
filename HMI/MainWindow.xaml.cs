@@ -436,12 +436,7 @@ namespace Prova
                 }
             }
         }
-        private Storyboard SBMarquee;
-        private DoubleAnimation XAnimation;
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
 
-        }
         private void AddToWrapPanel(object header, object tag)
         {
             ToggleButton mybutton = new()
@@ -470,10 +465,7 @@ namespace Prova
             };
             mybutton.ToolTip = tooltip;
             mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
-            mybutton.Style = (Style)Resources["marquee"];
-            SBMarquee = this.Resources["SBmarquee"] as Storyboard;
-            XAnimation = SBMarquee.Children[0] as DoubleAnimation;
-            XAnimation.To = mybutton.ActualWidth * -1;
+            mybutton.Style = (Style)Resources["button"];
             Wrap.Children.Add(mybutton);
         }
         private void DoubleClick(object sender, RoutedEventArgs e)
