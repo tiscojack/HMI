@@ -95,8 +95,9 @@ namespace Prova
     public partial class MainWindow : Window
     {
         bool demo = false;
-        static string csvPath = "C:\\Users\\s_ls015\\source\\repos\\HMI\\HMI\\resources\\prova.csv";
-        //static string csvPath = "C:\\Progetti\\Osn\\OAMD\\Codice\\OAMDSW\\AOMDHMI\\HMI\\resources\\prova.csv";
+        static string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
+        string csvPath = string.Format("{0}resources\\prova.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
+        string imagePath = "pack://application:,,,/resources/Rina2.bmp";
         //FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new List<TreeViewItem>();
         int selectedItemIndex = -1;
@@ -107,9 +108,7 @@ namespace Prova
             InitializeComponent();
             /*Aggiunta da GPO per impedire minimizzazione*/
             //fullMan.PreventClose(MainWindowOAMD);
-
-            imgLogo.Source = CreatebitmapImage(@"C:\Users\s_ls015\source\repos\HMI\HMI\resources\Rina2.bmp", 50);
-            //imgLogo.Source = createbitmapImage(@"C:\Progetti\Osn\OAMD\Codice\OAMDSW\AOMDHMI\HMI\resources\Rina2.bmp", 50);
+            imgLogo.Source = CreatebitmapImage(imagePath, 50);
 
             DispatcherTimer timer = new()
             {

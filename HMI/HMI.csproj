@@ -12,6 +12,8 @@
     <None Remove="resources\albero_configurazione.xml" />
     <None Remove="resources\GerarchiaSistemaOAMD.xml" />
     <None Remove="resources\ita.jpg" />
+    <None Remove="resources\prova.csv" />
+    <None Remove="resources\Rina2.bmp" />
     <None Remove="resources\uk.jpg" />
   </ItemGroup>
 
@@ -30,6 +32,12 @@
     </Resource>
     <Resource Include="resources\ita.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\prova.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\Rina2.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="resources\uk.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
