@@ -162,12 +162,13 @@
                 HorizontalAlignment="Stretch" />
         <DockPanel x:Name="rightDocPanel" Grid.Column="2" Grid.Row="1">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
-                <Grid 
+                <TabControl
                     x:Name="DocPanel"
                     Grid.Column="2"
                     Background="#F5F5F5"
                     >
-                    <WrapPanel
+                    <TabItem Header="Main View">
+                        <WrapPanel
                         Name="Wrap"
                         Grid.Column="2"
                         HorizontalAlignment="Center"
@@ -175,7 +176,8 @@
                         ItemWidth="170"
                         ItemHeight="80"
                         />
-                </Grid>
+                    </TabItem>
+                </TabControl>
             </ScrollViewer>
         </DockPanel>
 

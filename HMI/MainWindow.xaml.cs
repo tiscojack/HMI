@@ -75,7 +75,8 @@ namespace Prova
         DEGRADED,
         MAINTENANCE,
         UNKNOWN,
-        OPERATIVE
+        OPERATIVE, 
+        NOSTATUS
     }
 
     public class DataEntry
@@ -100,7 +101,7 @@ namespace Prova
     {
         bool demo = false;
         static string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
-        string csvPath = string.Format("{0}resources\\prova.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
+        string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
         string imagePath = "pack://application:,,,/resources/Rina2.bmp";
         //FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new();
@@ -176,7 +177,7 @@ namespace Prova
                     while (i < lines.Length)
                     {
                         line = lines[i++];
-                        var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        var splittedLine = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
                         Random rand = new();
                         int _salt = rand.Next();
@@ -231,8 +232,7 @@ namespace Prova
                 int tabcounter = 0;
                 Dictionary<string, List<DataEntry>> csvData = new();
                 Import_CSV(csvPath, out csvData);
-                TabControl tab = new();
-                rightDocPanel.Children.Add(tab);
+                TabControl tab = DocPanel;
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
                 
@@ -259,12 +259,26 @@ namespace Prova
                                 if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); up.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); };
                             };
                         }
+                        double maxVal = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp();
+                        var step = maxVal switch
+                        {
+                            <= 10800 => 180,
+                            <= 21600 and > 10800 => 300,
+                            <= 43200 and > 21600 => 600,
+                            <= 86400 and > 43200 => 1800,
+                            <= 259200 and > 86400 => 3600,
+                            <= 604800 and > 259200 => 7200,
+                            <= 1296000 and > 604800 => 14400,
+                            <= 2592000 and > 1296000 => 28800,
+                            <= 3888000 and > 2592000 => 43200,
+                            _ => (double)43200,
+                        };
                         CartesianChart grafico = new()
                         {
-                            Width = 980,
+                            Width = 4000,
                             Height = 100,
-                            ZoomMode = ZoomAndPanMode.X,
-                            TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden,
+                            // ZoomMode = ZoomAndPanMode.X,
+                            TooltipPosition = TooltipPosition.Hidden,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
@@ -292,14 +306,16 @@ namespace Prova
 
                                 }
                             },
-                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 3.5},  },
-                            YAxes = new List<Axis> { new Axis { MinLimit = 0, MaxLimit=1, Labels = new string[] { "DOWN", "UP" } } }
+                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + step / 2 }, },
+                            YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit=1, Labels = new string[] { "DOWN", "UP" } } }
                         };
                         if (tabcounter % 10 == 0) 
                         { 
                             panel.Add(new StackPanel() {Orientation = Orientation.Vertical}); 
-                            sv.Add(new ScrollViewer() {VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+                            sv.Add(new ScrollViewer() {VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
                         }
+                        
+                        panel[tabcounter / 10].Children.Add(new TextBlock() { Text = mybutton.ToolTip.ToString().Substring(33), Margin = new Thickness(10, 0, 0, 0), FontSize = 15  });
                         panel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
@@ -312,9 +328,7 @@ namespace Prova
                     ti[i].Header = String.Format("Tab {0}", i);
                     tab.Items.Insert(i, ti[i]);
                 }
-
-                Wrap.Children.Clear();
-
+                Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 0));
             }
             catch (Exception ex)
             {
@@ -354,7 +368,7 @@ namespace Prova
                 while (i < lines.Length)
                 {
                     line = lines[i++];
-                    var splittedLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    var splittedLine = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     var status1 = splittedLine[3] switch
                     {
                         "OPERATIVE" => (Status1)4,
@@ -450,7 +464,7 @@ namespace Prova
 
         private void AddToWrapPanel(object header, object tag)
         {
-            
+            Status1 status = Status1.NOSTATUS ;
             ToggleButton mybutton = new()
             {
                 Margin = new Thickness(10, 20, 10, 20),
@@ -470,7 +484,12 @@ namespace Prova
             };
             Dictionary<string, List<DataEntry>> csvData = new();
             Import_CSV(csvPath, out csvData);
-            Status1 status = csvData[(string)tag].Last().get_status1();
+
+            if (csvData.ContainsKey((string)tag))
+            {
+                status = csvData[(string)tag].Last().get_status1();
+            }
+
 
             mybutton.Background = status switch
             {
