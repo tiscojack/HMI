@@ -261,8 +261,9 @@ namespace Prova
                         }
                         CartesianChart grafico = new()
                         {
-                            Width = 350,
-                            Height = 150,
+                            Width = 980,
+                            Height = 100,
+                            ZoomMode = ZoomAndPanMode.X,
                             TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
@@ -292,7 +293,7 @@ namespace Prova
                                 }
                             },
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", MinStep=5, ForceStepToMin=true, MinLimit= 0, MaxLimit=samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + 3.5},  },
-                            YAxes = new List<Axis> { new Axis { Labels = new string[] { "DOWN", "UP" } } }
+                            YAxes = new List<Axis> { new Axis { MinLimit = 0, MaxLimit=1, Labels = new string[] { "DOWN", "UP" } } }
                         };
                         if (tabcounter % 10 == 0) 
                         { 
