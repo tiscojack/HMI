@@ -24,6 +24,7 @@ using System.Diagnostics.Metrics;
 using LiveChartsCore.Drawing;
 using LiveChartsCore.Measure;
 using System.Diagnostics;
+using HarfBuzzSharp;
 
 namespace Prova
 {
@@ -236,7 +237,7 @@ namespace Prova
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
                 
-                List<TabItem> ti = new();
+                List<CloseableTab> ti = new();
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -315,17 +316,17 @@ namespace Prova
                             sv.Add(new ScrollViewer() {VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
                         }
                         
-                        panel[tabcounter / 10].Children.Add(new TextBlock() { Text = mybutton.ToolTip.ToString().Substring(33), Margin = new Thickness(10, 0, 0, 0), FontSize = 15  });
+                        panel[tabcounter / 10].Children.Add(new TextBlock() { Text = mybutton.ToolTip.ToString().Substring(33), Margin = new Thickness(10, 0, 0, 0), FontSize = 15 });
                         panel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
                 }
                 for (int i = 0; i <= (tabcounter-1) / 10; i++) {
-                    ti.Add(new TabItem());
+                    ti.Add(new CloseableTab());
                     ti[i].Content = sv[i];
                     sv[i].Content = panel[i];
 
-                    ti[i].Header = String.Format("Tab {0}", i);
+                    ti[i].Title = String.Format("Tab {0}", i+1);
                     tab.Items.Insert(i, ti[i]);
                 }
                 Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 0));
@@ -434,10 +435,6 @@ namespace Prova
         {
             TreeView treeView;
             TreeViewItem item;
-            if (rightDocPanel.Children.Count >= 2)
-            {
-                rightDocPanel.Children.RemoveRange(1, rightDocPanel.Children.Count);
-            }
             if (send != null)
             {
                 Wrap.Children.Clear();
@@ -458,7 +455,9 @@ namespace Prova
                             AddToWrapPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
+                    Dispatcher.BeginInvoke((Action)(() => DocPanel.SelectedItem = mainview));
                 }
+                
             }
         }
 

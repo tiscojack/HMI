@@ -15,7 +15,8 @@
         <Image x:Key="ita" Source="resources\ita.jpg"/>
         <Image x:Key="uk" Source="resources\uk.jpg"/>
 
-        
+
+
         <!-- not used atm -->
         <Style TargetType="{x:Type TextBox}" x:Key="searchbar">
             <Setter Property="Template">
@@ -125,7 +126,7 @@
                             <GradientStop Color="#FFEEEDED" Offset="0"/>
                             <GradientStop Color="#FFDDDDDD" Offset="1"/>
                         </LinearGradientBrush>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White" />
                         <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="Black" />
                     </TreeView.Resources>
                     <TreeView.ItemContainerStyle>
@@ -161,24 +162,27 @@
                 Width="5"
                 HorizontalAlignment="Stretch" />
         <DockPanel x:Name="rightDocPanel" Grid.Column="2" Grid.Row="1">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+            
                 <TabControl
                     x:Name="DocPanel"
                     Grid.Column="2"
                     Background="#F5F5F5"
                     >
-                    <TabItem Header="Main View">
+                    <TabItem Header="Main View" x:Name="mainview">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
                         <WrapPanel
-                        Name="Wrap"
-                        Grid.Column="2"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        ItemWidth="170"
-                        ItemHeight="80"
+                            Name="Wrap"
+                            Grid.Column="2"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            ItemWidth="170"
+                            ItemHeight="80"
                         />
-                    </TabItem>
+                    </ScrollViewer>
+
+                </TabItem>
                 </TabControl>
-            </ScrollViewer>
+    
         </DockPanel>
 
     </Grid>
