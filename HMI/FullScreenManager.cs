@@ -21,19 +21,19 @@ namespace HMI
                 window.Dispatcher.Invoke((Action)(() =>
                 {
                     Thread.Sleep(100);
-                    window.WindowState = System.Windows.WindowState.Maximized;
+                    window.WindowState = WindowState.Maximized;
                 }));
             });
         }
 
-        void Window4_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        void Window_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
         }
 
         public void PreventClose(MainWindow OamdWin)
         {
-            OamdWin.Closing += new System.ComponentModel.CancelEventHandler(Window4_Closing);
+            OamdWin.Closing += new CancelEventHandler(Window_Closing);
         }
     }
 }

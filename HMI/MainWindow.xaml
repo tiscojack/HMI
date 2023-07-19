@@ -1,40 +1,48 @@
-<Window x:Name="MainWindowOAMD"
+<Window
     x:Class="Prova.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:Prova"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="MainWindowOAMD"
     Title="RINA HMI"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterScreen"
     WindowState="Maximized"
-    mc:Ignorable="d" StateChanged="MainWindowOAMD_StateChanged" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None">
+    WindowStyle="None"
+    mc:Ignorable="d">
 
     <Window.Resources>
-        <Image x:Key="ita" Source="resources\ita.jpg"/>
-        <Image x:Key="uk" Source="resources\uk.jpg"/>
+        <Image x:Key="ita" Source="resources\ita.jpg" />
+        <Image x:Key="uk" Source="resources\uk.jpg" />
 
 
 
-        <!-- not used atm -->
-        <Style TargetType="{x:Type TextBox}" x:Key="searchbar">
+        <!--  not used atm  -->
+        <Style x:Key="searchbar" TargetType="{x:Type TextBox}">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBox}">
-                        <Border CornerRadius="10" Background="#353340" Width="Auto" Height="40">
+                        <Border
+                            Width="Auto"
+                            Height="40"
+                            Background="#353340"
+                            CornerRadius="10">
                             <Grid>
-                                <Rectangle StrokeThickness="1"/>
-                                <TextBox Margin="1"
-                                         Text="Search Here"
-                                         BorderThickness="0"
-                                         Background="Transparent"
-                                         VerticalContentAlignment="Center"
-                                         Padding="5"    
-                                         Foreground="#CFCFCF"
-                                         x:Name="searchbartext"
-                                         TextChanged="TxtSearch_TextChanged"
-                                         />
+                                <Rectangle StrokeThickness="1" />
+                                <TextBox
+                                    x:Name="searchbartext"
+                                    Margin="1"
+                                    Padding="5"
+                                    VerticalContentAlignment="Center"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="#CFCFCF"
+                                    Text="Search Here"
+                                    TextChanged="TxtSearch_TextChanged" />
                             </Grid>
                         </Border>
                     </ControlTemplate>
@@ -42,147 +50,203 @@
             </Setter>
         </Style>
     </Window.Resources>
-    
+
     <Grid>
-        
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" MinWidth="150" MaxWidth="800"/>
+            <ColumnDefinition
+                Width="200"
+                MinWidth="150"
+                MaxWidth="800" />
             <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid  x:Name="UpStackPanel" Grid.ColumnSpan="3" Grid.Row="0" Background="#0D1D35">
+        <Grid
+            x:Name="UpStackPanel"
+            Grid.Row="0"
+            Grid.ColumnSpan="3"
+            Background="#0D1D35">
             <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="1"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="1" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
 
-            <Image HorizontalAlignment="Left" VerticalAlignment="Center" Name="imgLogo" Grid.Column="0" Grid.Row="0" Margin="20,10"/>
-            <Canvas Grid.Row="1" Background="White"/>
-            <Button Grid.Row="2" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Click="LanguageButton_Click" Name="LanguageButton" Background="#0D1D35" Height="25" Width="35" HorizontalAlignment ="Right" Margin="110, 0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                <DynamicResource ResourceKey="ita"/>
+            <Image
+                Name="imgLogo"
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="20,10"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center" />
+            <Canvas Grid.Row="1" Background="White" />
+            <Button
+                Name="LanguageButton"
+                Grid.Row="2"
+                Width="35"
+                Height="25"
+                Margin="110,0"
+                HorizontalAlignment="Right"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Background="#0D1D35"
+                BorderThickness="0"
+                Click="LanguageButton_Click"
+                Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                <DynamicResource ResourceKey="ita" />
             </Button>
-            <Button Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" Background="#1F437A" Height="30" Width="70" FontWeight="Bold" Foreground="#FFFFFF" Margin="20,0">
+            <Button
+                Grid.Row="2"
+                Width="70"
+                Height="30"
+                Margin="20,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Background="#1F437A"
+                FontWeight="Bold"
+                Foreground="#FFFFFF">
                 <i:Interaction.Behaviors>
-                    <local:DropDownButtonBehavior/>
+                    <local:DropDownButtonBehavior />
                 </i:Interaction.Behaviors>
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="USER" TextAlignment="Left" FontSize="10"/>
-                        <Path Margin="10,0,0,0" VerticalAlignment="Center" Width="10" Fill="#F5F5F5" Stretch="Uniform" HorizontalAlignment="Right" Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "/>
+                        <TextBlock
+                            FontSize="10"
+                            Text="USER"
+                            TextAlignment="Left" />
+                        <Path
+                            Width="10"
+                            Margin="10,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "
+                            Fill="#F5F5F5"
+                            Stretch="Uniform" />
                     </StackPanel>
                 </Button.Content>
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Preview" Click="Preview_Click"/>
-                        <MenuItem Header="Demo" Click="Demo_Click"/>
-                        <Separator/>
-                        <MenuItem Header="Settings"/>
-                        <Separator/>
-                        <MenuItem Header="Close"  Click="Close_Click"/>
+                        <MenuItem Click="Preview_Click" Header="Preview" />
+                        <MenuItem Click="Demo_Click" Header="Demo" />
+                        <Separator />
+                        <MenuItem Header="Settings" />
+                        <Separator />
+                        <MenuItem Click="Close_Click" Header="Close" />
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
-            
+
         </Grid>
 
-        <DockPanel x:Name="leftDocPanel" Grid.Row="1" Background="#C2D4F0">
+        <DockPanel
+            x:Name="leftDocPanel"
+            Grid.Row="1"
+            Background="#C2D4F0">
             <DockPanel DockPanel.Dock="Top" LastChildFill="true">
                 <Button Click="SearchresultsbuttonUp_Click" DockPanel.Dock="Right">
                     <Button.Content>
-                        <Path Data="M 0 6 L 12 6 L 6 0 Z" 
-                              Fill="Black"/>
+                        <Path Data="M 0 6 L 12 6 L 6 0 Z" Fill="Black" />
                     </Button.Content>
                 </Button>
                 <Button Click="SearchresultsbuttonDown_Click" DockPanel.Dock="Right">
                     <Button.Content>
-                        <Path Data="M 0 0 L 6 6 L 12 0 Z" 
-                              Fill="Black"/>
+                        <Path Data="M 0 0 L 6 6 L 12 0 Z" Fill="Black" />
                     </Button.Content>
                 </Button>
-                <TextBox x:Name="txtSearch" Background="#C2D4F0" ToolTip="Search Here" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" TextChanged="TxtSearch_TextChanged" Grid.Column="0" Grid.Row="1"/>
-            </DockPanel>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent" HorizontalScrollBarVisibility="Auto">
-                <TreeView
-                    BorderThickness="0"
-                    Name="dirTree"
+                <TextBox
+                    x:Name="txtSearch"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
                     Background="#C2D4F0"
+                    Text=""
+                    TextChanged="TxtSearch_TextChanged"
+                    ToolTip="Search Here" />
+            </DockPanel>
+            <ScrollViewer
+                Background="Transparent"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
+                <TreeView
+                    Name="dirTree"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    Background="#C2D4F0"
+                    BorderThickness="0"
                     MouseUp="Tv_MouseUp">
 
                     <TreeView.Resources>
-                        <LinearGradientBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" EndPoint="0,1" StartPoint="0,0">
-                            <GradientStop Color="#FFD9F4FF" Offset="0"/>
-                            <GradientStop Color="#FF9BDDFB" Offset="1"/>
+                        <LinearGradientBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="#FFD9F4FF" />
+                            <GradientStop Offset="1" Color="#FF9BDDFB" />
                         </LinearGradientBrush>
-                        <LinearGradientBrush x:Key="{x:Static SystemColors.ControlBrushKey}" EndPoint="0,1" StartPoint="0,0">
-                            <GradientStop Color="#FFEEEDED" Offset="0"/>
-                            <GradientStop Color="#FFDDDDDD" Offset="1"/>
+                        <LinearGradientBrush x:Key="{x:Static SystemColors.ControlBrushKey}" StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="#FFEEEDED" />
+                            <GradientStop Offset="1" Color="#FFDDDDDD" />
                         </LinearGradientBrush>
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White" />
                         <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="Black" />
                     </TreeView.Resources>
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="{x:Type TreeViewItem}">
-                            <Setter Property="BorderThickness" Value="1.5"/>
+                            <Setter Property="BorderThickness" Value="1.5" />
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="BorderBrush" Value="#adc6e5"/>
+                                    <Setter Property="BorderBrush" Value="#adc6e5" />
                                 </Trigger>
                                 <MultiTrigger>
                                     <MultiTrigger.Conditions>
-                                        <Condition Property="IsSelected" Value="True"/>
-                                        <Condition Property="IsSelectionActive" Value="False"/>
+                                        <Condition Property="IsSelected" Value="True" />
+                                        <Condition Property="IsSelectionActive" Value="False" />
                                     </MultiTrigger.Conditions>
-                                    <Setter Property="BorderBrush" Value="LightGray"/>
+                                    <Setter Property="BorderBrush" Value="LightGray" />
                                 </MultiTrigger>
                             </Style.Triggers>
                             <Style.Resources>
                                 <Style TargetType="Border">
-                                    <Setter Property="CornerRadius" Value="2"/>
+                                    <Setter Property="CornerRadius" Value="2" />
                                 </Style>
                             </Style.Resources>
                         </Style>
                     </TreeView.ItemContainerStyle>
 
                 </TreeView>
-            
+
             </ScrollViewer>
         </DockPanel>
-            <GridSplitter
-                Grid.Column="1"
-                Grid.Row="1"
-                Width="5"
-                HorizontalAlignment="Stretch" />
-        <DockPanel x:Name="rightDocPanel" Grid.Column="2" Grid.Row="1">
-            
-                <TabControl
-                    x:Name="DocPanel"
-                    Grid.Column="2"
-                    Background="#F5F5F5"
-                    >
-                    <TabItem Header="Main View" x:Name="mainview">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+        <GridSplitter
+            Grid.Row="1"
+            Grid.Column="1"
+            Width="5"
+            HorizontalAlignment="Stretch" />
+        <DockPanel
+            x:Name="rightDocPanel"
+            Grid.Row="1"
+            Grid.Column="2">
+
+            <TabControl
+                x:Name="DocPanel"
+                Grid.Column="2"
+                Background="#F5F5F5">
+                <TabItem x:Name="mainview" Header="Main View">
+                    <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto">
                         <WrapPanel
                             Name="Wrap"
                             Grid.Column="2"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            ItemWidth="170"
                             ItemHeight="80"
-                        />
+                            ItemWidth="170" />
                     </ScrollViewer>
-
                 </TabItem>
-                </TabControl>
-    
+            </TabControl>
         </DockPanel>
 
     </Grid>

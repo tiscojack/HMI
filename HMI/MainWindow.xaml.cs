@@ -1,11 +1,14 @@
+using HMI;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore;
-using Microsoft.Xaml.Behaviors;
+using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.WPF;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -15,61 +18,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Xml;
 using Path = System.IO.Path;
-using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView.WPF;
-using HMI;
-using System.Text;
-using System.Windows.Media.Animation;
-using System.Diagnostics.Metrics;
-using LiveChartsCore.Drawing;
-using LiveChartsCore.Measure;
-using System.Diagnostics;
-using HarfBuzzSharp;
 
 namespace Prova
 {
-    public class DropDownButtonBehavior : Behavior<Button>
-    {
-        private bool isContextMenuOpen;
-
-        protected override void OnAttached()
-        {
-            base.OnAttached();
-            AssociatedObject.AddHandler(Button.ClickEvent, new RoutedEventHandler(AssociatedObject_Click), true);
-        }
-
-        void AssociatedObject_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (sender is Button source && source.ContextMenu != null)
-            {
-                if (!isContextMenuOpen)
-                {
-                    // Add handler to detect when the ContextMenu closes
-                    source.ContextMenu.AddHandler(ContextMenu.ClosedEvent, new RoutedEventHandler(ContextMenu_Closed), true);
-                    // If there is a drop-down assigned to this button, then position and display it 
-                    source.ContextMenu.PlacementTarget = source;
-                    source.ContextMenu.Placement = PlacementMode.Bottom;
-                    source.ContextMenu.IsOpen = true;
-                    isContextMenuOpen = true;
-                }
-            }
-        }
-
-        protected override void OnDetaching()
-        {
-            base.OnDetaching();
-            AssociatedObject.RemoveHandler(Button.ClickEvent, new RoutedEventHandler(AssociatedObject_Click));
-        }
-
-        void ContextMenu_Closed(object sender, RoutedEventArgs e)
-        {
-            isContextMenuOpen = false;
-            if (sender is ContextMenu contextMenu)
-            {
-                contextMenu.RemoveHandler(ContextMenu.ClosedEvent, new RoutedEventHandler(ContextMenu_Closed));
-            }
-        }
-    }
     public enum Status1
     {
         FAILURE,
@@ -80,49 +31,32 @@ namespace Prova
         NOSTATUS
     }
 
-    public class DataEntry
-    {
-        private bool status;
-        private double unixtimestamp;
-        private Status1 status1;
-
-        public DataEntry(double unixtimestamp, bool status, Status1 status1)
-        {
-            this.status = status;
-            this.unixtimestamp = unixtimestamp;
-            this.status1 = status1;
-        }
-
-        public bool get_status() { return this.status; }
-        public double get_unixtimestamp() { return this.unixtimestamp; }
-        public Status1 get_status1() { return this.status1; }
-    }
-
     public partial class MainWindow : Window
     {
         bool demo = false;
         static string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
         string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
         string imagePath = "pack://application:,,,/resources/Rina2.bmp";
-        //FullScreenManager fullMan = new FullScreenManager();
         List<TreeViewItem> selectedItemList = new();
-        int selectedItemIndex = -1;
+        int selectedItemIndex = -1; 
+        Dictionary<string, List<DataEntry>> csvData = new();
 
         public MainWindow()
         {
 
             InitializeComponent();
-            /*Aggiunta da GPO per impedire minimizzazione*/
-            //fullMan.PreventClose(MainWindowOAMD);
+
             imgLogo.Source = CreatebitmapImage(imagePath, 50);
 
-            DispatcherTimer timer = new()
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            StartTimer();
 
+            SetupTreeView();
+            Import_CSV(csvPath, csvData);
+
+        }
+
+        private void SetupTreeView()
+        {
             //First, we'll load the Xml document
             XmlDocument xDoc = new();
             xDoc.Load(@"resources\albero_configurazione.xml");
@@ -137,13 +71,19 @@ namespace Prova
             };
             dirTree.Items.Add(treeviewItemRoot);
 
-            TreeViewItem tNode = new();
-            tNode = (TreeViewItem)dirTree.Items[0];
-
             //We make a call to addTreeNode, 
             //where we'll add all of our nodes
-            AddTreeNode(xDoc.DocumentElement, tNode);
+            AddTreeNode(xDoc.DocumentElement, treeviewItemRoot);
+        }
 
+        private void StartTimer()
+        {
+            DispatcherTimer timer = new()
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
         private void LanguageButton_Click(object sender, RoutedEventArgs e)
@@ -154,43 +94,13 @@ namespace Prova
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            _ = new Dictionary<string, List<DataEntry>>();
-            Import_CSV(csvPath, out Dictionary<string, List<DataEntry>> csvData);
             if (demo)
             {
-                try
-                {
-                    if (!File.Exists(csvPath))
-                    {
-                        MessageBox.Show(String.Format("The selected file doesn't exist"), "R+G Management", MessageBoxButton.OK, MessageBoxImage.Error);
-                        csvData = null;
-                        return;
-                    }
-                    
-                    StreamReader sR = new(new FileStream(csvPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    string allFile = sR.ReadToEnd();
-                    sR.Close();
-                    var lines = allFile.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                    var csv = new StringBuilder();
-
-                    string line;
-                    int i = 0;
-                    while (i < lines.Length)
-                    {
-                        line = lines[i++];
-                        var splittedLine = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        Random rand = new();
-                        int _salt = rand.Next();
-
-                        var newLine = $"{splittedLine[0]},{splittedLine[1]},{_salt % 2},{(Status1)(_salt % 5)}";
-                        csv.AppendLine(newLine);
-                    }
-                    File.WriteAllText(csvPath, csv.ToString());
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("There are some issue with the csv" + ex.Message);
+                Random rand = new();
+                foreach (var item in csvData) {
+                    int _salt = rand.Next();
+                    item.Value.Last().set_status(Convert.ToBoolean(_salt % 2));
+                    item.Value.Last().set_status1((Status1)(_salt % 5));
                 }
             }
 
@@ -198,7 +108,10 @@ namespace Prova
             {
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
-                    Status1 status = csvData[mybutton.ToolTip.ToString().Substring(33)].Last().get_status1();
+                    //un po' hardcoded, bisogna capire come passarlo in maniera intelligente
+                    string sbc = mybutton.ToolTip.ToString().Substring(33);
+                    if (!csvData.ContainsKey(sbc)) { continue; }
+                    Status1 status = csvData[sbc].Last().get_status1();
 
                     mybutton.Background = status switch
                     {
@@ -211,14 +124,15 @@ namespace Prova
                     };
                 }
             }
-            catch { return; };
+            catch(Exception ex) {
+                MessageBox.Show(ex.ToString());
+                return; };
         }
 
 
         private void Demo_Click(object sender, RoutedEventArgs e)
         {
             demo = !demo;
-
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
@@ -231,8 +145,6 @@ namespace Prova
             try
             {
                 int tabcounter = 0;
-                Dictionary<string, List<DataEntry>> csvData = new();
-                Import_CSV(csvPath, out csvData);
                 TabControl tab = DocPanel;
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
@@ -307,7 +219,7 @@ namespace Prova
 
                                 }
                             },
-                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp() + step / 2 }, },
+                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
                             YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit=1, Labels = new string[] { "DOWN", "UP" } } }
                         };
                         if (tabcounter % 10 == 0) 
@@ -316,7 +228,11 @@ namespace Prova
                             sv.Add(new ScrollViewer() {VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
                         }
                         
-                        panel[tabcounter / 10].Children.Add(new TextBlock() { Text = mybutton.ToolTip.ToString().Substring(33), Margin = new Thickness(10, 0, 0, 0), FontSize = 15 });
+                        panel[tabcounter / 10].Children.Add(new TextBlock()     
+                                                                    {   Text = mybutton.ToolTip.ToString().Substring(33),     
+                                                                        Margin = new Thickness(10, 0, 0, 0), 
+                                                                        FontSize = 15   
+                                                                    });
                         panel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
@@ -327,9 +243,9 @@ namespace Prova
                     sv[i].Content = panel[i];
 
                     ti[i].Title = String.Format("Tab {0}", i+1);
-                    tab.Items.Insert(i, ti[i]);
+                    tab.Items.Insert(i+1, ti[i]);
                 }
-                Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 0));
+                Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
             }
             catch (Exception ex)
             {
@@ -346,7 +262,7 @@ namespace Prova
             return dateTime;
         }
 
-        private void Import_CSV(string filePath, out Dictionary<string, List<DataEntry>> csvData)
+        private void Import_CSV(string filePath, Dictionary<string, List<DataEntry>> csvData)
         {
             try
             {
@@ -358,7 +274,7 @@ namespace Prova
                     csvData = null;
                     return;
                 }
-                csvData = new Dictionary<string, List<DataEntry>>();
+                
                 StreamReader sR = new(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 string allFile = sR.ReadToEnd();
                 sR.Close();
@@ -469,20 +385,18 @@ namespace Prova
                 Margin = new Thickness(10, 20, 10, 20),
                 MinHeight = 30,
                 MaxHeight = 100,
-                MaxWidth = 300,
-                MinWidth = 100
+                MinWidth = 100,
+                MaxWidth = 300 
             };
             
             mybutton.Content = new TextBlock()
             {
                 Name = "togglebuttonTextBlock",
-                Text = header.ToString().Replace("_", " "),
+                Text = header.ToString()?.Replace("_", " "),
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap
 
             };
-            Dictionary<string, List<DataEntry>> csvData = new();
-            Import_CSV(csvPath, out csvData);
 
             if (csvData.ContainsKey((string)tag))
             {
@@ -505,7 +419,6 @@ namespace Prova
             };
             mybutton.ToolTip = tooltip;
             mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
-            mybutton.Style = (Style)Resources["button"];
             Wrap.Children.Add(mybutton);
         }
         private void DoubleClick(object sender, RoutedEventArgs e)
@@ -587,12 +500,6 @@ namespace Prova
             bitmapImage.EndInit();
 
             return bitmapImage;
-        }
-
-        /*Aggiunta da GPO per impedire minimizzazione*/
-        private async void MainWindowOAMD_StateChanged(object sender, EventArgs e)
-        {
-            //await fullMan.MaximizeWindow(this);
         }
 
         private void SearchresultsbuttonDown_Click(object sender, RoutedEventArgs e)
