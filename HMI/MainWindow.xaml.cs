@@ -286,16 +286,16 @@ namespace Prova
                 {
                     line = lines[i++];
                     var splittedLine = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                    var status1 = splittedLine[3] switch
+                    Status1 status1 = splittedLine[3] switch
                     {
-                        "OPERATIVE" => (Status1)4,
-                        "UNKNOWN" => (Status1)3,
-                        "MAINTENANCE" => (Status1)2,
-                        "DEGRADED" => (Status1)1,
                         "FAILURE" => (Status1)0,
-                        _ => (Status1)3,
+                        "DEGRADED" => (Status1)1,
+                        "MAINTENANCE" => (Status1)2,
+                        "UNKNOWN" => (Status1)3,
+                        "OPERATIVE" => (Status1)4,
+                        _ => (Status1)5,
                     };
-                    DataEntry data = new DataEntry(Double.Parse(splittedLine[1]), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
+                    DataEntry data = new(Double.Parse(splittedLine[1]), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
                     if (!csvData.ContainsKey(splittedLine[0]))
                     {
                         List<DataEntry> list = new() { data };
@@ -373,7 +373,6 @@ namespace Prova
                     }
                     Dispatcher.BeginInvoke((Action)(() => DocPanel.SelectedItem = mainview));
                 }
-                
             }
         }
 

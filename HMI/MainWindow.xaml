@@ -18,41 +18,9 @@
     <Window.Resources>
         <Image x:Key="ita" Source="resources\ita.jpg" />
         <Image x:Key="uk" Source="resources\uk.jpg" />
-
-
-
-        <!--  not used atm  -->
-        <Style x:Key="searchbar" TargetType="{x:Type TextBox}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TextBox}">
-                        <Border
-                            Width="Auto"
-                            Height="40"
-                            Background="#353340"
-                            CornerRadius="10">
-                            <Grid>
-                                <Rectangle StrokeThickness="1" />
-                                <TextBox
-                                    x:Name="searchbartext"
-                                    Margin="1"
-                                    Padding="5"
-                                    VerticalContentAlignment="Center"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Foreground="#CFCFCF"
-                                    Text="Search Here"
-                                    TextChanged="TxtSearch_TextChanged" />
-                            </Grid>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid>
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition
                 Width="200"
@@ -141,7 +109,6 @@
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
-
         </Grid>
 
         <DockPanel
@@ -216,9 +183,7 @@
                             </Style.Resources>
                         </Style>
                     </TreeView.ItemContainerStyle>
-
                 </TreeView>
-
             </ScrollViewer>
         </DockPanel>
         <GridSplitter
@@ -230,7 +195,6 @@
             x:Name="rightDocPanel"
             Grid.Row="1"
             Grid.Column="2">
-
             <TabControl
                 x:Name="DocPanel"
                 Grid.Column="2"
@@ -248,6 +212,5 @@
                 </TabItem>
             </TabControl>
         </DockPanel>
-
     </Grid>
 </Window>
