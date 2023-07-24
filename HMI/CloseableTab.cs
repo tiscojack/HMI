@@ -11,45 +11,9 @@ namespace HMI
 {
     class CloseableTab: TabItem
     {
-        private CloseableHeader header; 
-        
-        public CloseableTab()   
-        {
-            var closeableTabHeader = new CloseableHeader();
-            this.Header = closeableTabHeader;
-            header = (CloseableHeader)this.Header;
-            closeableTabHeader.button_close.Click +=    
-                new RoutedEventHandler(button_close_Click);
-            closeableTabHeader.MouseDoubleClick += CloseableTabHeader_MouseDoubleClick1;
-            header.edittab.LostFocus += Edittab_LostFocus;
-            header.edittab.KeyDown += Edittab_KeyDown;
-        }
-
-        private void Edittab_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key != System.Windows.Input.Key.Enter) { return; }
-            header.label_TabTitle.Content = header.edittab.Text;
-            header.edittab.Visibility = Visibility.Hidden;
-            header.label_TabTitle.Visibility = Visibility.Visible;
-        }
-
-        private void Edittab_LostFocus(object sender, RoutedEventArgs e)
-        {
-            header.label_TabTitle.Content = header.edittab.Text;
-            header.edittab.Visibility = Visibility.Hidden;
-                header.label_TabTitle.Visibility = Visibility.Visible;
-        }
-
-        private void CloseableTabHeader_MouseDoubleClick1(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            header.edittab.Visibility = Visibility.Visible;
-            header.label_TabTitle.Visibility = Visibility.Hidden;
-            header.edittab.Focus();
-            header.edittab.SelectAll();
-
-        }
-
-
+        // Simple attribute that represents the TabItem header object
+        private readonly CloseableHeader header;
+        // Simple attribute that represents the TabItem header content
         public string Title
         {
             set
@@ -58,10 +22,39 @@ namespace HMI
                 header.edittab.Text = value;
             }
         }
-
-        void button_close_Click(object sender, RoutedEventArgs e)
+        public CloseableTab()   
         {
-            ((TabControl)this.Parent).Items.Remove(this);
+            var closeableTabHeader = new CloseableHeader();
+            this.Header = closeableTabHeader;
+            header = (CloseableHeader)this.Header;
+            // Handles the click of the close button
+            closeableTabHeader.button_close.Click += (s, e) =>
+            {
+                ((TabControl)this.Parent).Items.Remove(this);
+            };
+            // When the header is double-clicked, allows editing of the textbox
+            closeableTabHeader.MouseDoubleClick += (s, e) =>
+            {
+                header.edittab.Visibility = Visibility.Visible;
+                header.label_TabTitle.Visibility = Visibility.Hidden;
+                header.edittab.Focus();
+                header.edittab.SelectAll();
+            };
+            // When the user finishes editing the textbox, saves the change into the label 
+            header.edittab.LostFocus += (s, e) =>
+            {
+                header.label_TabTitle.Content = header.edittab.Text;
+                header.edittab.Visibility = Visibility.Hidden;
+                header.label_TabTitle.Visibility = Visibility.Visible;
+            };
+            // When the user finishes editing the textbox, saves the change into the label 
+            header.edittab.KeyDown += (s, e) =>
+            {
+                if (e.Key != System.Windows.Input.Key.Enter) { return; }
+                header.label_TabTitle.Content = header.edittab.Text;
+                header.edittab.Visibility = Visibility.Hidden;
+                header.label_TabTitle.Visibility = Visibility.Visible;
+            };
         }
     }
 }

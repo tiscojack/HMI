@@ -52,34 +52,35 @@ namespace Prova
             SetupTreeView();
             Import_CSV(csvPath, csvData);
         }
-
+        // Loads the XML and creates the TreeView root
         private void SetupTreeView()
         {
-            //First, we'll load the Xml document
+            // Load the XML document
             XmlDocument xDoc = new();
             xDoc.Load(@"resources\albero_configurazione.xml");
 
-            //Now, clear out the treeview, 
+            // Clear out the treeview 
             dirTree.Items.Clear();
 
-            //and add the first (root) node
+            // Add the root node
             TreeViewItem treeviewItemRoot = new()
             {
                 Header = "FREMM"
             };
             dirTree.Items.Add(treeviewItemRoot);
 
-            //We make a call to addTreeNode, 
-            //where we'll add all of our nodes
+            // Call to addTreeNode, 
+            // Which recursively populates the TreeView
             AddTreeNode(xDoc.DocumentElement, treeviewItemRoot);
         }
-
+        // Setups and starts the timer that handles the async refreshes of the UI 
         private void StartTimer()
         {
             DispatcherTimer timer = new()
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
+            // Attach the function to the Tick event
             timer.Tick += Timer_Tick;
             timer.Start();
         }
@@ -89,18 +90,10 @@ namespace Prova
             LanguageButton.Content = FindResource(LanguageButton.Content == FindResource("ita") ? "uk" : "ita");
 
         }
-
+        // Functions invoked every tick of the timer that refreshes the UI 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            if (demo)
-            {
-                Random rand = new();
-                foreach (var item in csvData) {
-                    int _salt = rand.Next();
-                    item.Value.Last().set_status(Convert.ToBoolean(_salt % 2));
-                    item.Value.Last().set_status1((Status1)(_salt % 5));
-                }
-            }
+            Demo();
 
             try
             {
@@ -110,7 +103,7 @@ namespace Prova
                     string sbc = mybutton.ToolTip.ToString().Substring(33);
                     if (!csvData.ContainsKey(sbc)) { continue; }
                     Status1 status = csvData[sbc].Last().get_status1();
-
+                    
                     mybutton.Background = status switch
                     {
                         (Status1)0 => Brushes.Red,
@@ -122,16 +115,32 @@ namespace Prova
                     };
                 }
             }
-            catch(Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show(ex.ToString());
-                return; };
+                return;
+            };
+        }
+
+        private void Demo()
+        {
+            if (demo)
+            {
+                Random rand = new();
+                foreach (var item in csvData)
+                {
+                    int _salt = rand.Next();
+                    item.Value.Last().set_status(Convert.ToBoolean(_salt % 2));
+                    item.Value.Last().set_status1((Status1)(_salt % 5));
+                }
+            }
         }
 
         private void Demo_Click(object sender, RoutedEventArgs e)
         {
             demo = !demo;
         }
-
+        // Event handler that closes the app when invoked
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             App.Current.Shutdown();
@@ -183,6 +192,7 @@ namespace Prova
                             <= 3888000 and > 2592000 => 43200,
                             _ => (double)43200,
                         };
+
                         CartesianChart grafico = new()
                         {
                             Width = 4000,
@@ -250,7 +260,7 @@ namespace Prova
                 return;
             }
         }
-
+        // Utils
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
@@ -258,7 +268,7 @@ namespace Prova
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
-
+        // Opens the .csv file and reads its data into a dictionary 
         private void Import_CSV(string filePath, Dictionary<string, List<DataEntry>> csvData)
         {
             try
@@ -306,7 +316,7 @@ namespace Prova
             }
             catch (Exception ex)
             {
-                throw new Exception("There are some issue with the csv" + ex.Message);
+                throw new Exception("There are some issues with the csv" + ex.Message);
             }
         }
         //This function is called recursively until all nodes are loaded
