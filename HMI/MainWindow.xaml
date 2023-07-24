@@ -101,6 +101,7 @@
                 <Button.ContextMenu>
                     <ContextMenu>
                         <MenuItem Click="Preview_Click" Header="Preview" />
+                        <MenuItem Click="Export_Click" Header="Export" />
                         <MenuItem Click="Demo_Click" Header="Demo" />
                         <Separator />
                         <MenuItem Header="Settings" />
@@ -199,7 +200,7 @@
                 x:Name="DocPanel"
                 Grid.Column="2"
                 Background="#F5F5F5">
-                <TabItem x:Name="mainview" Header="Main View">
+                <TabItem x:Name="mainview" Header="Main View" MinHeight="30">
                     <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto">
                         <WrapPanel
                             Name="Wrap"

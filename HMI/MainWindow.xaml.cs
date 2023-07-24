@@ -1,11 +1,14 @@
 using HMI;
+using LiveCharts.Events;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
 using SkiaSharp;
+using SkiaSharp.Views.WPF;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -129,9 +132,12 @@ namespace Prova
                 Random rand = new();
                 foreach (var item in csvData)
                 {
-                    int _salt = rand.Next();
-                    item.Value.Last().set_status(Convert.ToBoolean(_salt % 2));
-                    item.Value.Last().set_status1((Status1)(_salt % 5));
+                    foreach (var value in item.Value)
+                    {
+                        int _salt = rand.Next();
+                        value.set_status(Convert.ToBoolean(_salt % 2));
+                        value.set_status1((Status1)(_salt % 5));
+                    }
                 }
             }
         }
@@ -196,9 +202,8 @@ namespace Prova
                         CartesianChart grafico = new()
                         {
                             Width = 4000,
-                            Height = 100,
-                            // ZoomMode = ZoomAndPanMode.X,
-                            TooltipPosition = TooltipPosition.Hidden,
+                            Height = 200,
+                            ZoomMode = ZoomAndPanMode.X,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
@@ -223,23 +228,31 @@ namespace Prova
                                         chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
                                     }
-
                                 }
                             },
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
                             YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
+                        
+                        // Adds a new tab every 10 graphs 
                         if (tabcounter % 10 == 0) 
                         { 
-                            panel.Add(new StackPanel() {Orientation = Orientation.Vertical}); 
-                            sv.Add(new ScrollViewer() {VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
+                            panel.Add(new StackPanel() { Orientation = Orientation.Vertical });
+                            sv.Add(new ScrollViewer() { VerticalScrollBarVisibility = 
+                                                            ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
                         }
                         
-                        panel[tabcounter / 10].Children.Add(new TextBlock()     
-                                                                    {   Text = mybutton.ToolTip.ToString().Substring(33),     
+                        panel[tabcounter / 10].Children.Add(new ToggleButton()     
+                                                                    {   Content = mybutton.ToolTip.ToString().Substring(33),     
                                                                         Margin = new Thickness(10, 0, 0, 0), 
-                                                                        FontSize = 15   
+                                                                        FontSize = 15,
+                                                                        Width = 100,
+                                                                        Height = 50,
+                                                                        HorizontalAlignment = HorizontalAlignment.Left,
                                                                     });
+
+                        this.AddHandler(UIElement.MouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent));
+                        
                         panel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
@@ -252,6 +265,9 @@ namespace Prova
                     ti[i].Title = String.Format("Preview Tab {0}", i+1);
                     tab.Items.Insert(i+1, ti[i]);
                 }
+                // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
+                demo = false;
+                // Sets the selected tab to the first of the newly inserted ones
                 Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
             }
             catch (Exception ex)
@@ -260,6 +276,168 @@ namespace Prova
                 return;
             }
         }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int tabcounter = 0;
+                TabControl tab = DocPanel;
+                List<StackPanel> panel = new();
+                List<ScrollViewer> sv = new();
+
+                List<CloseableTab> ti = new();
+                foreach (ToggleButton mybutton in Wrap.Children)
+                {
+                    if ((bool)mybutton.IsChecked)
+                    {
+                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString().Substring(33)];
+                        List<DataEntry> green = new();
+                        List<DataEntry> red = new();
+                        for (int i = 0; i < samples.Count; i++)
+                        {
+                            if (samples[i].get_status())
+                            {
+                                green.Add(samples[i]);
+                                red.Add(null);
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { green.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); red.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); };
+                            }
+                            else
+                            {
+                                red.Add(samples[i]);
+                                green.Add(null);
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { red.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); green.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); };
+                            };
+                        }
+                        double maxVal = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp();
+
+                        CartesianChart grafico = new()
+                        {
+                            Width = 60000,
+                            Height = 400,
+                            //ZoomMode = ZoomAndPanMode.X,
+                            
+                            HorizontalAlignment = HorizontalAlignment.Left,
+                            Series = new[]
+                            {
+                                new StepLineSeries<DataEntry>()
+                                {
+                                    Values = green,
+                                    Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 0 },
+                                    Fill = new SolidColorPaint(SKColors.Green),
+                                    GeometrySize = 0,
+                                    Mapping = (sample, chartPoint) =>
+                                    {
+                                        chartPoint.PrimaryValue = sample.get_status1() switch
+                                        {
+                                            (Status1)0 => 1,
+                                            (Status1)1 => 2,
+                                            (Status1)2 => 3,
+                                            (Status1)3 => 4,
+                                            (Status1)4 => 5,
+                                            _ => 6,
+                                        };
+                                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
+                                    }
+                                },
+                                new StepLineSeries<DataEntry>()
+                                {
+                                    Values = red,
+                                    Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 0 },
+                                    Fill = new SolidColorPaint(SKColors.Red),
+                                    GeometrySize = 0,
+                                    Mapping = (sample, chartPoint) =>
+                                    {
+                                        chartPoint.PrimaryValue = sample.get_status1() switch
+                                        {
+                                            (Status1)0 => 1,
+                                            (Status1)1 => 2,
+                                            (Status1)2 => 3,
+                                            (Status1)3 => 4,
+                                            (Status1)4 => 5,
+                                            _ => 6,
+                                        };
+                                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
+                                    }
+                                }
+                            },
+                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal + 50}, },
+                            YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 6, Labels = new string[] {"", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE" }, }, }
+                        };
+
+                        // Adds a new tab every 10 graphs 
+                        if (tabcounter % 10 == 0)
+                        {
+                            panel.Add(new StackPanel() { Orientation = Orientation.Vertical });
+                            sv.Add(new ScrollViewer()
+                            {
+                                VerticalScrollBarVisibility =
+                                                            ScrollBarVisibility.Auto,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+                            });
+                        }
+
+                        panel[tabcounter / 10].Children.Add(new ToggleButton()
+                        {
+                            Content = mybutton.ToolTip.ToString().Substring(33),
+                            Margin = new Thickness(10, 0, 0, 0),
+                            FontSize = 15,
+                            Width = 100,
+                            Height = 50,
+                            HorizontalAlignment = HorizontalAlignment.Left,
+                        });
+                        panel[tabcounter / 10].Children.Add(grafico);
+                        tabcounter++;
+                    }
+                }
+                for (int i = 0; i <= (tabcounter - 1) / 10; i++)
+                {
+                    ti.Add(new CloseableTab());
+                    ti[i].Content = sv[i];
+                    sv[i].Content = panel[i];
+
+                    ti[i].Title = String.Format("Preview Tab {0}", i + 1);
+                    tab.Items.Insert(i + 1, ti[i]);
+                }
+                // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
+                demo = false;
+                // Sets the selected tab to the first of the newly inserted ones
+                Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return;
+            }
+        }
+        // Prevents the event from bubbling up to the scrollviewer, effectively disabling the mousewheel scroll on it
+        private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
+        {
+            
+            var sv = DocPanel.SelectedContent as ScrollViewer;
+            var panel = sv.Content as StackPanel;
+            bool zoom = true;
+            int counter = 0;
+            foreach (var child in panel.Children)
+            {
+                if (counter > 6) MessageBox.Show("Non è rotto");
+                // loop dispari
+                if (child.GetType().ToString() == "System.Windows.Controls.Primitives.ToggleButton")
+                {
+                    var btn = child as ToggleButton;
+                    zoom = (bool)btn.IsChecked;
+                }  else if (zoom) //loop dispari (condizionale)
+                {   
+                    var graph = child as CartesianChart;
+                    
+                    //graph.RemoveHandler(UIElement.MouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent));
+                    ((CartesianChart)child).RaiseEvent(e);
+                    //graph.AddHandler(UIElement.MouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent));
+                }
+                counter++;
+            }
+        }
+
         // Utils
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
