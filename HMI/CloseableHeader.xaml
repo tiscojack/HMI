@@ -11,10 +11,10 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
-        <Label  Height="23" Grid.Column="0" 
+        <Label  Height="27" Grid.Column="0" 
           Margin="4,0,0,0" Name="label_TabTitle"
           FontSize="12" />
-        <TextBox Visibility="Hidden" x:Name="edittab" Text="" Panel.ZIndex="1"/>
+        <TextBox Visibility="Hidden" x:Name="edittab" Text="" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button Content="X"  Height="19" Grid.Column="1"
           Name="button_close" Width="20" 
           FontWeight="Bold" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" 

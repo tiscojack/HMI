@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -52,7 +51,6 @@ namespace Prova
 
             SetupTreeView();
             Import_CSV(csvPath, csvData);
-
         }
 
         private void SetupTreeView()
@@ -128,7 +126,6 @@ namespace Prova
                 MessageBox.Show(ex.ToString());
                 return; };
         }
-
 
         private void Demo_Click(object sender, RoutedEventArgs e)
         {
@@ -220,7 +217,7 @@ namespace Prova
                                 }
                             },
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
-                            YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit=1, Labels = new string[] { "DOWN", "UP" } } }
+                            YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
                         if (tabcounter % 10 == 0) 
                         { 
@@ -242,7 +239,7 @@ namespace Prova
                     ti[i].Content = sv[i];
                     sv[i].Content = panel[i];
 
-                    ti[i].Title = String.Format("Tab {0}", i+1);
+                    ti[i].Title = String.Format("Preview Tab {0}", i+1);
                     tab.Items.Insert(i+1, ti[i]);
                 }
                 Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
@@ -394,14 +391,12 @@ namespace Prova
                 Text = header.ToString()?.Replace("_", " "),
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap
-
             };
 
             if (csvData.ContainsKey((string)tag))
             {
                 status = csvData[(string)tag].Last().get_status1();
             }
-
 
             mybutton.Background = status switch
             {
@@ -412,10 +407,12 @@ namespace Prova
                 (Status1)4 => Brushes.Green,
                 _ => Brushes.Gray,
             };
+
             ToolTip tooltip = new()
             {
                 Content = (string)tag
             };
+
             mybutton.ToolTip = tooltip;
             mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
             Wrap.Children.Add(mybutton);
@@ -530,7 +527,5 @@ namespace Prova
                 SelectTreeViewItem((object)dirTree);
             }
         }
-        
-      
     }
 }
