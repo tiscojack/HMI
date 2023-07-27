@@ -1,14 +1,14 @@
 using HMI;
-using LiveCharts.Events;
+using LiveChartsCore.Drawing;
+using LiveChartsCore;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Drawing;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
 using SkiaSharp;
-using SkiaSharp.Views.WPF;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -413,14 +413,12 @@ namespace Prova
         // Prevents the event from bubbling up to the scrollviewer, effectively disabling the mousewheel scroll on it
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
-            
             var sv = DocPanel.SelectedContent as ScrollViewer;
             var panel = sv.Content as StackPanel;
             bool zoom = true;
             int counter = 0;
             foreach (var child in panel.Children)
             {
-                if (counter > 6) MessageBox.Show("Non è rotto");
                 // loop dispari
                 if (child.GetType().ToString() == "System.Windows.Controls.Primitives.ToggleButton")
                 {
@@ -429,10 +427,9 @@ namespace Prova
                 }  else if (zoom) //loop dispari (condizionale)
                 {   
                     var graph = child as CartesianChart;
-                    
-                    //graph.RemoveHandler(UIElement.MouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent));
-                    ((CartesianChart)child).RaiseEvent(e);
-                    //graph.AddHandler(UIElement.MouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent));
+                    var core = graph.CoreChart as CartesianChart<SkiaSharpDrawingContext>;
+                    Point position = e.GetPosition(this);
+                    core.Zoom(new LvcPoint((float)position.X, (float)position.Y), (e.Delta <= 0) ? ZoomDirection.ZoomOut : ZoomDirection.ZoomIn);
                 }
                 counter++;
             }

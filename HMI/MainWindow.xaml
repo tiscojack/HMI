@@ -200,7 +200,10 @@
                 x:Name="DocPanel"
                 Grid.Column="2"
                 Background="#F5F5F5">
-                <TabItem x:Name="mainview" Header="Main View" MinHeight="30">
+                <TabItem
+                    x:Name="mainview"
+                    MinHeight="30"
+                    Header="Main View">
                     <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto">
                         <WrapPanel
                             Name="Wrap"
