@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:system="clr-namespace:System;assembly=netstandard">
+    <system:String x:Key="langIta">Italiano</system:String>
+    <system:String x:Key="langEng">English</system:String>
+    <system:String x:Key="profile">Utente</system:String>
+    <system:String x:Key="exportPreview">Anteprima</system:String>
+    <system:String x:Key="importMissions">Importazione Dati</system:String>
+    <system:String x:Key="Settings">Impostazioni</system:String>
+    <system:String x:Key="Close">Chiudi</system:String>
+    <system:String x:Key="demoStart">Avvia Dimostrazione</system:String>
+    <system:String x:Key="demoStop">Arresta Dimostrazione</system:String>
+    <system:String x:Key="treeviewRoot">FREMM</system:String>
+    <system:String x:Key="csvIssue">Sono stati riscontrati problemi nel file csv.</system:String>
+    <system:String x:Key="msgDemoTitle">Dimostrazione</system:String>
+    <system:String x:Key="msgDemoStart">Modalità dimostrazione avviata</system:String>
+    <system:String x:Key="msgDemoStop">Modalità dimostrazione interrotta</system:String>
+    <system:String x:Key="msgFileImport">File importati:</system:String>
+    <system:String x:Key="msgNoFileSelected">Nessun file selezionato</system:String>
+    <system:String x:Key="msgFileNoExists">Il file selezionato non esiste</system:String>
+    <system:String x:Key="msgFileNoExistsTitle">Gestione R+G</system:String>
+    <system:String x:Key="msgImportResultTitle">Esito importazione</system:String>
+</ResourceDictionary>

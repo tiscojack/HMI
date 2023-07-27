@@ -10,9 +10,17 @@
   <ItemGroup>
     <None Remove="resources\alberoFREMM_GP_ASW_Completo.xml" />
     <None Remove="resources\albero_configurazione.xml" />
+    <None Remove="resources\FremmSplash.jpg" />
     <None Remove="resources\GerarchiaSistemaOAMD.xml" />
     <None Remove="resources\ita.jpg" />
+    <None Remove="resources\left.jpg" />
+    <None Remove="resources\right.jpg" />
     <None Remove="resources\uk.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="StringResources.en.xaml" />
+    <Page Remove="StringResources.it.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,14 +32,29 @@
     </EmbeddedResource>
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.801" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
+    <PackageReference Include="System.Management" Version="7.0.2" />
+    <Resource Include="resources\FremmSplash.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="resources\GerarchiaSistemaOAMD.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="resources\ita.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="resources\left.jpg" />
+    <Resource Include="resources\right.jpg" />
     <Resource Include="resources\uk.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\StringResources.en.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="resources\StringResources.it.xaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -40,6 +63,10 @@
     <Compile Update="MainWindow.xaml.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

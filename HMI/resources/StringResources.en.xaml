@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=netstandard">
+    <system:String x:Key="langIta">Italiano</system:String>
+    <system:String x:Key="langEng">English</system:String>
+    <system:String x:Key="profile">User</system:String>
+    <system:String x:Key="exportPreview">Preview</system:String>
+    <system:String x:Key="importMissions">Import Data</system:String>
+    <system:String x:Key="Settings">Settings</system:String>
+    <system:String x:Key="Close">Close</system:String>
+    <system:String x:Key="demoStart">Start Demo</system:String>
+    <system:String x:Key="demoStop">Stop Demo</system:String>
+    <system:String x:Key="treeviewRoot">FREMM</system:String>
+    <system:String x:Key="csvIssue">There are some issue with the csv file</system:String>
+    <system:String x:Key="msgDemoTitle">Demo</system:String>
+    <system:String x:Key="msgDemoStart">Demo Mode Started</system:String>
+    <system:String x:Key="msgDemoStop">Demo Mode Stopped</system:String>
+    <system:String x:Key="msgFileImport">Files Imported:</system:String>
+    <system:String x:Key="msgNoFileSelected">No file selected</system:String>
+    <system:String x:Key="msgFileNoExists">The selected file doesn't exist</system:String>
+    <system:String x:Key="msgFileNoExistsTitle">R+G Management</system:String>
+    <system:String x:Key="msgImportResultTitle">Import Result</system:String>
+</ResourceDictionary>
