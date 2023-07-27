@@ -42,6 +42,7 @@ namespace Prova
         List<TreeViewItem> selectedItemList = new();
         int selectedItemIndex = -1; 
         Dictionary<string, List<DataEntry>> csvData = new();
+        private static readonly string PREVIEW_TAB_ID = "00";
 
         public MainWindow()
         {
@@ -263,6 +264,7 @@ namespace Prova
                     sv[i].Content = panel[i];
 
                     ti[i].Title = String.Format("Preview Tab {0}", i+1);
+                    sv[i].Tag = PREVIEW_TAB_ID;
                     tab.Items.Insert(i+1, ti[i]);
                 }
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
@@ -410,13 +412,13 @@ namespace Prova
                 return;
             }
         }
-        // Prevents the event from bubbling up to the scrollviewer, effectively disabling the mousewheel scroll on it
+        // Propagates the MouseWheel event to all the selected preview graphs
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
             var sv = DocPanel.SelectedContent as ScrollViewer;
+            if (sv.Tag.ToString() != "00") { return; }
             var panel = sv.Content as StackPanel;
             bool zoom = true;
-            int counter = 0;
             foreach (var child in panel.Children)
             {
                 // loop dispari
@@ -431,7 +433,6 @@ namespace Prova
                     Point position = e.GetPosition(this);
                     core.Zoom(new LvcPoint((float)position.X, (float)position.Y), (e.Delta <= 0) ? ZoomDirection.ZoomOut : ZoomDirection.ZoomIn);
                 }
-                counter++;
             }
         }
 
