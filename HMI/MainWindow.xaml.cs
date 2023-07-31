@@ -6,6 +6,8 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
+//using LiveChartsCore.SkiaSharpView.Maui;
+using LiveChartsCore.SkiaSharpView.SKCharts;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Xml;
 using Path = System.IO.Path;
-
+using ExcelClass;
+using System.Runtime.InteropServices;
+using Microsoft.Office.Interop.Excel;
+using Excel = Microsoft.Office.Interop.Excel;
 namespace Prova
 {
     public partial class MainWindow : Window
@@ -273,8 +278,8 @@ namespace Prova
                                         (chartPoint) => $"",
                                 }
                             },
-                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
-                            YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
+                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
+                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
                         // Adds a new tab every 10 graphs. 
                         if (chartcounter % NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB == 0) 
@@ -380,6 +385,9 @@ namespace Prova
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
                 List<CloseableTab> ti = new();
+
+                List<CartesianChart> list_charts = new List<CartesianChart>();
+                List<string> list_titles = new List<string>();
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -404,18 +412,19 @@ namespace Prova
                         }
                         double maxVal = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp();
 
+                        
                         CartesianChart grafico = new()
                         {
                             Width = 60000,
                             Height = 400,
-                            //ZoomMode = ZoomAndPanMode.X,
-                            
+                            ZoomMode = ZoomAndPanMode.X,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
                                 new StepLineSeries<DataEntry>()
                                 {
                                     Values = green,
+                                    Name = mybutton.ToolTip.ToString().Substring(33),
                                     Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 0 },
                                     Fill = new SolidColorPaint(SKColors.Green),
                                     GeometrySize = 0,
@@ -454,9 +463,11 @@ namespace Prova
                                     }
                                 }
                             },
-                            XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal + 50}, },
-                            YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 6, Labels = new string[] {"", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE" }, }, }
+                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal + 50}, },
+                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 10, MinLimit = 0, MaxLimit = 6, Labels = new string[] {"", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE" }, }, }
                         };
+
+                        
 
                         // Adds a new tab every 10 graphs 
                         if (tabcounter % 10 == 0)
@@ -470,19 +481,21 @@ namespace Prova
                             });
                         }
 
-                        panel[tabcounter / 10].Children.Add(new ToggleButton()
+                        panel[tabcounter / 10].Children.Add(new System.Windows.Controls.TextBox()
                         {
                             Content = mybutton.ToolTip.ToString()[33..],
                             Margin = new Thickness(10, 0, 0, 0),
                             FontSize = 15,
-                            Width = 100,
-                            Height = 50,
                             HorizontalAlignment = HorizontalAlignment.Left,
                         });
+                        list_titles.Add(mybutton.ToolTip.ToString().Substring(33));
                         panel[tabcounter / 10].Children.Add(grafico);
+                        list_charts.Add(grafico);
                         tabcounter++;
+                        
                     }
                 }
+
                 for (int i = 0; i <= (tabcounter - 1) / 10; i++)
                 {
                     ti.Add(new CloseableTab());
@@ -495,8 +508,65 @@ namespace Prova
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
                 demo = false;
                 // Sets the selected tab to the first of the newly inserted ones
-                Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
+                Dispatcher.BeginInvoke((System.Action)(() => tab.SelectedIndex = 1));
+
+                
+                string folder_path = @"C:\Users\lenovo\source\repos\HMIver2\HMI\bin\Debug\net6.0-windows";
+                List<string> list_images = new List<string>();
+                for (int i = 0; i < list_charts.Count; i++)
+                {
+                    string image = CreateImageFromCartesianChart(folder_path, list_charts[i], i);
+                    list_images.Add(image);
+                }
+
+                ExportImageToExcel(list_images, list_titles);
+               
+
+
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return;
+            }
+        }
+
+        private string CreateImageFromCartesianChart(string _folderPath, CartesianChart chart, int cont)
+        {
+           
+            var chartControl = chart;
+            var skChart = new SKCartesianChart(chartControl) { Width = 600, Height = 350, };
+            skChart.SaveImage(Path.Combine(_folderPath, "chart" + cont + ".png"));
+            string image_path = "chart" + cont + ".png";
+            return image_path;
+            
+        }
+
+        public void ExportImageToExcel(List<string> list_images, List<string> list_titles)
+        {
+            try
+            {
+
+                string path = "C:\\Users\\lenovo\\Desktop\\prova.xls";
+                string sheet_name = "Chart";
+                Class1 excel = new Class1();
+
+                excel.OpenFile(path, true);
+                excel.AddSheet(sheet_name, true);
+                excel.SetSheet(sheet_name);
+
+                for(int i = 0; i < list_images.Count; i++)
+                {
+                    excel.SetTitleIntoSheet(excel.GetSheet(sheet_name), list_titles[i], i);
+                    excel.SetImageIntoSheet(excel.GetSheet(sheet_name), list_images[i], i);
+                }
+
+                excel.CloseFile();
+                
+
+
+            }
+
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
@@ -522,7 +592,7 @@ namespace Prova
                 {   
                     var graph = graphpanel.Children[k] as CartesianChart;
                     var core = graph.CoreChart as CartesianChart<SkiaSharpDrawingContext>;
-                    Point position = e.GetPosition(this);
+                    System.Windows.Point position = e.GetPosition(this);
                     core.Zoom(new LvcPoint((float)position.X, (float)position.Y), (e.Delta <= 0) ? ZoomDirection.ZoomOut : ZoomDirection.ZoomIn);
                 }
                 k++;
