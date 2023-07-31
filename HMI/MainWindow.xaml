@@ -141,7 +141,8 @@
             <ScrollViewer
                 Background="Transparent"
                 HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto">
+                VerticalScrollBarVisibility="Auto"
+                PreviewMouseWheel="IgnoreWheelEvent">
                 <TreeView
                     Name="dirTree"
                     HorizontalAlignment="Stretch"

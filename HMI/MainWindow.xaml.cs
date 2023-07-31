@@ -35,26 +35,22 @@ namespace Prova
 
     public partial class MainWindow : Window
     {
-        bool demo = false;
-        static string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
-        string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
-        string imagePath = "pack://application:,,,/resources/Rina2.bmp";
-        List<TreeViewItem> selectedItemList = new();
-        int selectedItemIndex = -1; 
-        Dictionary<string, List<DataEntry>> csvData = new();
+        private static readonly string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
+        private static readonly string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
+        private static readonly string imagePath = "pack://application:,,,/resources/Rina2.bmp";
+        private readonly Dictionary<string, List<DataEntry>> csvData = new();
+        private readonly List<TreeViewItem> selectedItemList = new();
         private static readonly string PREVIEW_TAB_ID = "00";
         private static readonly int PREVIEW_GRAPH_HEIGHT = 200; 
         private static readonly int PREVIEW_BTN_HEIGHT = 40;
+        private int selectedItemIndex = -1;
+        private bool demo = false;
 
         public MainWindow()
         {
-
             InitializeComponent();
-
             imgLogo.Source = CreatebitmapImage(imagePath, 50);
-
             StartTimer();
-
             SetupTreeView();
             Import_CSV(csvPath, csvData);
         }
@@ -64,17 +60,14 @@ namespace Prova
             // Load the XML document
             XmlDocument xDoc = new();
             xDoc.Load(@"resources\albero_configurazione.xml");
-
             // Clear out the treeview 
             dirTree.Items.Clear();
-
             // Add the root node
             TreeViewItem treeviewItemRoot = new()
             {
                 Header = "FREMM"
             };
             dirTree.Items.Add(treeviewItemRoot);
-
             // Call to addTreeNode, 
             // Which recursively populates the TreeView
             AddTreeNode(xDoc.DocumentElement, treeviewItemRoot);
@@ -94,7 +87,6 @@ namespace Prova
         private void LanguageButton_Click(object sender, RoutedEventArgs e)
         {
             LanguageButton.Content = FindResource(LanguageButton.Content == FindResource("ita") ? "uk" : "ita");
-
         }
         // Functions invoked every tick of the timer that refreshes the UI 
         private void Timer_Tick(object sender, EventArgs e)
@@ -178,7 +170,6 @@ namespace Prova
                 }
             }
         }
-
         private void Demo_Click(object sender, RoutedEventArgs e)
         {
             demo = !demo;
@@ -188,7 +179,6 @@ namespace Prova
         {
             App.Current.Shutdown();
         }
-
         private void Preview_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -200,6 +190,7 @@ namespace Prova
                 List<StackPanel> btnpanel = new();
                 List<ScrollViewer> sv = new();
                 List<ScrollViewer> svgraph = new();
+                List<ScrollViewer> svbtn = new();
                 List<CloseableTab> ti = new();
                 GenerateChartData();
                 foreach (ToggleButton mybutton in Wrap.Children)
@@ -245,6 +236,7 @@ namespace Prova
                             Height = PREVIEW_GRAPH_HEIGHT,
                             Margin = new Thickness(0, PREVIEW_BTN_HEIGHT, 0, 0),
                             ZoomMode = ZoomAndPanMode.X,
+                            ZoomingSpeed = 0.2,
                             TooltipFindingStrategy = TooltipFindingStrategy.CompareOnlyX,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
@@ -280,7 +272,6 @@ namespace Prova
                                         (chartPoint) => $"{UnixTimeStampToDateTime(chartPoint.SecondaryValue + samples[0].get_unixtimestamp())}",
                                     YToolTipLabelFormatter =
                                         (chartPoint) => $"",
-                                    
                                 }
                             },
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
@@ -291,16 +282,15 @@ namespace Prova
                         { 
                             graphpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
                             btnpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
-                            sv.Add(new ScrollViewer()
+                            svbtn.Add(new ScrollViewer()
                             {
-                                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
                             });
                             svgraph.Add(new ScrollViewer()
                             {
-                                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                                MaxWidth = 920,
+                                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
                             });
                             Grid grid = new();
                             ColumnDefinition c1 = new()
@@ -309,7 +299,7 @@ namespace Prova
                             };
                             ColumnDefinition c2 = new()
                             {
-                                Width = GridLength.Auto
+                                Width = new GridLength(950)
                             };
                             grid.ColumnDefinitions.Add(c1);
                             grid.ColumnDefinitions.Add(c2);
@@ -330,17 +320,19 @@ namespace Prova
                 }
                 for (int i = 0; i <= (tabcounter-1) / 10; i++) {
                     ti.Add(new CloseableTab());
-                    ti[i].Content = sv[i];
-                    sv[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
-                    sv[i].Content = grids[i];
-                    grids[i].Children.Add(btnpanel[i]);
-                    btnpanel[i].SetValue(Grid.ColumnProperty, 0);
+                    ti[i].Content = grids[i]; 
+                    ti[i].Title = String.Format("Preview Tab {0}", i + 1);
+                    ti[i].Tag = PREVIEW_TAB_ID;
+                    svgraph[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
+                    svbtn[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
+                    svbtn[i].Content = btnpanel[i];
+                    grids[i].Children.Add(svbtn[i]);
+                    svbtn[i].SetValue(Grid.ColumnProperty, 0);
                     grids[i].Children.Add(svgraph[i]);
                     svgraph[i].Content = graphpanel[i];
                     svgraph[i].SetValue(Grid.ColumnProperty, 1);
-                    ti[i].Title = String.Format("Preview Tab {0}", i+1);
-                    sv[i].Tag = PREVIEW_TAB_ID;
                     tab.Items.Insert(i+1, ti[i]);
+                    svgraph[i].ScrollChanged += new ScrollChangedEventHandler(svgraph_ScrollChanged);
                 }
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
                 demo = false;
@@ -353,12 +345,20 @@ namespace Prova
                 return;
             }
         }
-
+        private void svgraph_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.VerticalChange == 0) { return; }
+            var selectedtab = TabControl.SelectedItem as TabItem;
+            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID) { return; }
+            var svgraph = sender as ScrollViewer;
+            var grid = TabControl.SelectedContent as Grid;
+            var svbtn = grid.Children[0] as ScrollViewer;
+            svbtn.ScrollToVerticalOffset(svgraph.VerticalOffset);
+        }
         private void IgnoreWheelEvent(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
         }
-
         private void Export_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -495,12 +495,13 @@ namespace Prova
         // Propagates the MouseWheel event to all the selected preview graphs
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
-            var sv = TabControl.SelectedContent as ScrollViewer;
-            if (sv.Tag.ToString() != "00") { return; }
-            var grid = sv.Content as Grid;
-            var btnpanel = grid.Children[0] as StackPanel;
+            var selectedtab = TabControl.SelectedItem as TabItem;
+            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID) { return; }
+            var grid = TabControl.SelectedContent as Grid;
+            var svbtn = grid.Children[0] as ScrollViewer;
             var svgraph = grid.Children[1] as ScrollViewer;
             var graphpanel = svgraph.Content as StackPanel;
+            var btnpanel = svbtn.Content as StackPanel;
             bool zoom = true;
             int k = 0;
             foreach (var child in btnpanel.Children)
@@ -520,7 +521,6 @@ namespace Prova
                 k++;
             }
         }
-
         // Utils
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
@@ -598,23 +598,18 @@ namespace Prova
                     TreeViewItem nuovoNodo = new TreeViewItem();
                     var sys = xNode.Attributes["sys"].Value.ToString();
                     var sbc = xNode.Attributes["SBC"].Value.ToString();
-
                     nuovoNodo.Header = sys;
                     nuovoNodo.Tag = sbc;
-
                     treeNode.Items.Add(nuovoNodo);
-
                     tNode = treeNode.Items[x] as TreeViewItem;
                     AddTreeNode(xNode, tNode);
                 }
             }
         }
-
         private void Tv_MouseUp(object sender, MouseButtonEventArgs e)
         {
             SelectTreeViewItem(sender);
         }
-
         private void SelectTreeViewItem(object send)
         {
             TreeView treeView;
@@ -623,7 +618,6 @@ namespace Prova
             {
                 Wrap.Children.Clear();
                 treeView = (TreeView)send;
-
                 item = (TreeViewItem)(treeView.SelectedItem);
                 if (item != null)
                 {
@@ -699,7 +693,6 @@ namespace Prova
             }
             SelectTreeViewItem(dirTree);
         }
-
         private void LookForTvItem(TreeViewItem item, string text)
         {
             string sItem = (string)item.Header;
@@ -765,10 +758,8 @@ namespace Prova
             bitmapImage.UriSource = new Uri(P);
             bitmapImage.DecodePixelHeight = h;
             bitmapImage.EndInit();
-
             return bitmapImage;
         }
-
         private void SearchresultsbuttonDown_Click(object sender, RoutedEventArgs e)
         {
             int selectedItems = selectedItemList.Count;
@@ -783,7 +774,6 @@ namespace Prova
                 SelectTreeViewItem((object)dirTree);
             }
         }
-
         private void SearchresultsbuttonUp_Click(object sender, RoutedEventArgs e)
         {
             int selectedItems = selectedItemList.Count;
