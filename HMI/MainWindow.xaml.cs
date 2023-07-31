@@ -23,6 +23,7 @@ using Path = System.IO.Path;
 
 namespace Prova
 {
+    // Enum that representes the possible different states of a system.
     public enum Status1
     {
         FAILURE,
@@ -54,32 +55,31 @@ namespace Prova
             SetupTreeView();
             Import_CSV(csvPath, csvData);
         }
-        // Loads the XML and creates the TreeView root
+        // Loads the XML and creates the TreeView root.
         private void SetupTreeView()
         {
-            // Load the XML document
+            // Load the XML document.
             XmlDocument xDoc = new();
             xDoc.Load(@"resources\albero_configurazione.xml");
-            // Clear out the treeview 
+            // Clear out the treeview.
             dirTree.Items.Clear();
-            // Add the root node
+            // Add the root node.
             TreeViewItem treeviewItemRoot = new()
             {
                 Header = "FREMM"
             };
             dirTree.Items.Add(treeviewItemRoot);
-            // Call to addTreeNode, 
-            // Which recursively populates the TreeView
+            // Call to addTreeNode which recursively populates the TreeView.
             AddTreeNode(xDoc.DocumentElement, treeviewItemRoot);
         }
-        // Setups and starts the timer that handles the async refreshes of the UI 
+        // Setups and starts the timer that handles the async refreshes of the UI. 
         private void StartTimer()
         {
             DispatcherTimer timer = new()
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            // Attach the function to the Tick event
+            // Attach the function to the Tick event.
             timer.Tick += Timer_Tick;
             timer.Start();
         }
@@ -88,7 +88,7 @@ namespace Prova
         {
             LanguageButton.Content = FindResource(LanguageButton.Content == FindResource("ita") ? "uk" : "ita");
         }
-        // Functions invoked every tick of the timer that refreshes the UI 
+        // Functions invoked every tick of the timer that refreshes the UI. 
         private void Timer_Tick(object sender, EventArgs e)
         {
             Demo();
@@ -174,7 +174,7 @@ namespace Prova
         {
             demo = !demo;
         }
-        // Event handler that closes the app when invoked
+        // Event handler that closes the app when invoked.
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             App.Current.Shutdown();
@@ -277,7 +277,7 @@ namespace Prova
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
                             YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
-                        // Adds a new tab every 10 graphs 
+                        // Adds a new tab every 10 graphs. 
                         if (tabcounter % 10 == 0) 
                         { 
                             graphpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
@@ -334,9 +334,9 @@ namespace Prova
                     tab.Items.Insert(i+1, ti[i]);
                     svgraph[i].ScrollChanged += new ScrollChangedEventHandler(svgraph_ScrollChanged);
                 }
-                // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
+                // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy. 
                 demo = false;
-                // Sets the selected tab to the first of the newly inserted ones
+                // Sets the selected tab to the first of the newly inserted ones.
                 Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
             }
             catch (Exception ex)
@@ -492,7 +492,7 @@ namespace Prova
                 return;
             }
         }
-        // Propagates the MouseWheel event to all the selected preview graphs
+        // Propagates the MouseWheel event to all the selected preview graphs.
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
             var selectedtab = TabControl.SelectedItem as TabItem;
@@ -524,12 +524,12 @@ namespace Prova
         // Utils
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
-            // Unix timestamp is seconds past epoch
+            // Unix timestamp is seconds past epoch.
             DateTime dateTime = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
-        // Opens the .csv file and reads its data into a dictionary 
+        // Opens the .csv file and reads its data into a dictionary. 
         private void Import_CSV(string filePath, Dictionary<string, List<DataEntry>> csvData)
         {
             try
@@ -580,18 +580,18 @@ namespace Prova
                 throw new Exception("There are some issues with the csv" + ex.Message);
             }
         }
-        //This function is called recursively until all nodes are loaded
+        //This function is called recursively until all nodes are loaded.
         private void AddTreeNode(XmlNode xmlNode, TreeViewItem treeNode)
         {
             XmlNode xNode;
             TreeViewItem tNode;
             XmlNodeList xNodeList;
-            if (xmlNode.HasChildNodes) //The current node has children
+            if (xmlNode.HasChildNodes) //The current node has children.
             {
                 xNodeList = xmlNode.ChildNodes;
 
                 for (int x = 0; x <= xNodeList.Count - 1; x++)
-                //Loop through the child nodes
+                //Loop through the child nodes.
                 {
                     xNode = xmlNode.ChildNodes[x];
 
@@ -637,7 +637,6 @@ namespace Prova
                 }
             }
         }
-
         private void AddToWrapPanel(object header, object tag)
         {
             Status1 status = Status1.NOSTATUS ;
@@ -647,22 +646,19 @@ namespace Prova
                 MinHeight = 30,
                 MaxHeight = 100,
                 MinWidth = 100,
-                MaxWidth = 300 
+                MaxWidth = 300,
+                Content = new TextBlock()
+                {
+                    Name = "togglebuttonTextBlock",
+                    Text = header.ToString()?.Replace("_", " "),
+                    TextAlignment = TextAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap
+                }
             };
-            
-            mybutton.Content = new TextBlock()
-            {
-                Name = "togglebuttonTextBlock",
-                Text = header.ToString()?.Replace("_", " "),
-                TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.Wrap
-            };
-
             if (csvData.ContainsKey((string)tag))
             {
                 status = csvData[(string)tag].Last().get_status1();
             }
-
             mybutton.Background = status switch
             {
                 (Status1)0 => Brushes.Red,
@@ -672,20 +668,16 @@ namespace Prova
                 (Status1)4 => Brushes.Green,
                 _ => Brushes.Gray,
             };
-
-            ToolTip tooltip = new()
+            mybutton.ToolTip = new ToolTip()
             {
                 Content = (string)tag
             };
-
-            mybutton.ToolTip = tooltip;
             mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
             Wrap.Children.Add(mybutton);
         }
         private void DoubleClick(object sender, RoutedEventArgs e)
         {
-            ToggleButton button = (ToggleButton)sender;
-
+            var button = sender as ToggleButton;
             for (int i = 0; i < dirTree.Items.Count; i++)
             {
                 TextBlock tb = button.Content as TextBlock;
@@ -712,7 +704,6 @@ namespace Prova
                 LookForTvItem((TreeViewItem)item.Items[i], text);
             }
         }
-
         private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (dirTree.Items.Count > 0)
@@ -725,7 +716,6 @@ namespace Prova
                 }
             }
         }
-
         private void ExpandTreeItem(TreeViewItem item)
         {
             string text;
@@ -750,7 +740,6 @@ namespace Prova
                 ExpandTreeItem((TreeViewItem)item.Items[i]);
             }
         }
-
         public static BitmapImage CreatebitmapImage(string P, int h)
         {
             BitmapImage bitmapImage = new();
