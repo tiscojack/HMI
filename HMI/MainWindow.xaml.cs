@@ -23,23 +23,14 @@ using Path = System.IO.Path;
 
 namespace Prova
 {
-    // Enum that represents the possible different states of a system.
-    public enum Status1
-    {
-        FAILURE,
-        DEGRADED,
-        MAINTENANCE,
-        UNKNOWN,
-        OPERATIVE, 
-        NOSTATUS
-    }
     public partial class MainWindow : Window
     {
         // "Global" constants.
-        private static readonly string PREVIEW_TAB_ID = "00";
-        private static readonly int PREVIEW_GRAPH_HEIGHT = 150;
-        private static readonly int PREVIEW_BTN_HEIGHT = 35;
-        private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
+        private const int TIMER_TICK_SECONDS = 1;
+        private const int PREVIEW_GRAPH_HEIGHT = 150;
+        private const int PREVIEW_BTN_HEIGHT = 35;
+        private const int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
+        private const string PREVIEW_TAB_ID = "00";
         // Path to the input files.
         private static readonly string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
         private static readonly string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
@@ -50,13 +41,16 @@ namespace Prova
         // "Global" variables
         private int selectedItemIndex = -1;
         private bool demo = false;
-
         public MainWindow()
         {
             InitializeComponent();
+            // Loads and sets the source for the imgLogo image.
             imgLogo.Source = CreatebitmapImage(imagePath, 50);
+            // Creates a new Dispatch timer and attaches the proper events to it.
             StartTimer();
+            // Populates recursively the TreeView from config_tree.xml.
             SetupTreeView();
+            // Imports the status' data from status_data.csv.
             Import_CSV(csvPath, csvData);
         }
         // Loads the XML and creates the TreeView root.
@@ -81,7 +75,7 @@ namespace Prova
         {
             DispatcherTimer timer = new()
             {
-                Interval = TimeSpan.FromSeconds(1)
+                Interval = TimeSpan.FromSeconds(TIMER_TICK_SECONDS)
             };
             // Attach the function to the Tick event.
             timer.Tick += Timer_Tick;

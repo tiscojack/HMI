@@ -8,35 +8,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="resources\alberoFREMM_GP_ASW_Completo.xml" />
-    <None Remove="resources\albero_configurazione.xml" />
-    <None Remove="resources\GerarchiaSistemaOAMD.xml" />
+    <None Remove="resources\config_tree.xml" />
     <None Remove="resources\ita.jpg" />
-    <None Remove="resources\prova.csv" />
-    <None Remove="resources\Rina2.bmp" />
+    <None Remove="resources\Rina_logo.bmp" />
     <None Remove="resources\uk.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="resources\alberoFREMM_GP_ASW_Completo.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <EmbeddedResource Include="resources\albero_configurazione.xml">
+    <EmbeddedResource Include="resources\config_tree.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.801" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <Resource Include="resources\GerarchiaSistemaOAMD.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="resources\ita.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="resources\prova.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="resources\Rina2.bmp">
+    <Resource Include="resources\Rina_logo.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="resources\uk.jpg">

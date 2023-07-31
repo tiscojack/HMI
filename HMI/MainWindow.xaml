@@ -45,7 +45,6 @@
                 <RowDefinition Height="1" />
                 <RowDefinition Height="50" />
             </Grid.RowDefinitions>
-
             <Image
                 Name="imgLogo"
                 Grid.Row="0"
