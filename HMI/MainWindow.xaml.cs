@@ -242,7 +242,7 @@ namespace Prova
                             Height = PREVIEW_GRAPH_HEIGHT,
                             Margin = new Thickness(0, PREVIEW_BTN_HEIGHT, 0, 0),
                             ZoomMode = ZoomAndPanMode.X,
-                            ZoomingSpeed = 0.2,
+                            ZoomingSpeed = 0.1,
                             TooltipFindingStrategy = TooltipFindingStrategy.CompareOnlyX,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
@@ -521,11 +521,10 @@ namespace Prova
             var svgraph = grid.Children[1] as ScrollViewer;
             var graphpanel = svgraph.Content as StackPanel;
             var btnpanel = svbtn.Content as StackPanel;
-            bool zoom = true;
             int k = 0; //used to track the index of the chart.
             foreach (ToggleButton btn in btnpanel.Children)
             {
-                zoom = (bool)btn.IsChecked;
+                bool zoom = (bool)btn.IsChecked;
                 if (zoom) 
                 {   
                     var graph = graphpanel.Children[k] as CartesianChart;
@@ -570,7 +569,7 @@ namespace Prova
                 while (i < lines.Length)
                 {
                     line = lines[i++];
-                    // Further splits each line on every csv separator (in this file it's ';')
+                    // Further splits each line on every csv separator (in this case it's ';').
                     var splittedLine = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     Status1 status1 = splittedLine[3] switch
                     {
@@ -581,14 +580,18 @@ namespace Prova
                         "OPERATIVE" => (Status1)4,
                         _ => (Status1)5,
                     };
+                    // Creates a DataEntry instance, which encapsulated the data, for each line.
                     DataEntry data = new(Double.Parse(splittedLine[1]), Convert.ToBoolean(int.Parse(splittedLine[2])), status1);
                     if (!csvData.ContainsKey(splittedLine[0]))
                     {
+                        // If the system isn't already present in the dictionary, creates the new Key-List pair.
                         List<DataEntry> list = new() { data };
+                        // And adds the first data.
                         csvData.Add(splittedLine[0], list);
                     }
                     else
                     {
+                        // Otherwise the data gets added to the already existing list.
                         csvData[splittedLine[0]].Add(data);
                     }
                 }
