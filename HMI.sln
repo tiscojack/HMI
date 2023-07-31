@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMI", "HMI\HMI.csproj", "{B1993049-6858-421A-9884-8F8331FEF6BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMI", "HMI\HMI.csproj", "{B1993049-6858-421A-9884-8F8331FEF6BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelClass", "ExcelClass\ExcelClass.csproj", "{BFCAF0D7-8D47-49A3-A794-29692AEFFC80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B1993049-6858-421A-9884-8F8331FEF6BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1993049-6858-421A-9884-8F8331FEF6BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1993049-6858-421A-9884-8F8331FEF6BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFCAF0D7-8D47-49A3-A794-29692AEFFC80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFCAF0D7-8D47-49A3-A794-29692AEFFC80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFCAF0D7-8D47-49A3-A794-29692AEFFC80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFCAF0D7-8D47-49A3-A794-29692AEFFC80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
