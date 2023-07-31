@@ -23,7 +23,7 @@ using Path = System.IO.Path;
 
 namespace Prova
 {
-    // Enum that representes the possible different states of a system.
+    // Enum that represents the possible different states of a system.
     public enum Status1
     {
         FAILURE,
@@ -93,7 +93,6 @@ namespace Prova
         private void Timer_Tick(object sender, EventArgs e)
         {
             Demo();
-
             try
             {
                 foreach (ToggleButton mybutton in Wrap.Children)
@@ -102,7 +101,6 @@ namespace Prova
                     string sbc = mybutton.ToolTip.ToString().Substring(33);
                     if (!csvData.ContainsKey(sbc)) { continue; }
                     Status1 status = csvData[sbc].Last().get_status1();
-                    
                     mybutton.Background = status switch
                     {
                         (Status1)0 => Brushes.Red,
@@ -127,7 +125,6 @@ namespace Prova
             int i, j, stop, _salt, updown, numDataItems;
             Random rand;
             Status1 stat1;
-
             lock (csvData)
             {
                 keysList = csvData.Keys.ToList();
