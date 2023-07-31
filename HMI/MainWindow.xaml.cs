@@ -33,18 +33,21 @@ namespace Prova
         OPERATIVE, 
         NOSTATUS
     }
-
     public partial class MainWindow : Window
     {
+        private static readonly string PREVIEW_TAB_ID = "00";
+        private static readonly string MAINVIEW_TAB_ID = "01";
+        private static readonly int PREVIEW_GRAPH_HEIGHT = 150;
+        private static readonly int PREVIEW_BTN_HEIGHT = 35;
+        private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
+
         private static readonly string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
         private static readonly string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
         private static readonly string imagePath = "pack://application:,,,/resources/Rina2.bmp";
+
         private readonly Dictionary<string, List<DataEntry>> csvData = new();
         private readonly List<TreeViewItem> selectedItemList = new();
-        private static readonly string PREVIEW_TAB_ID = "00";
-        private static readonly int PREVIEW_GRAPH_HEIGHT = 150; 
-        private static readonly int PREVIEW_BTN_HEIGHT = 35;
-        private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
+
         private int selectedItemIndex = -1;
         private bool demo = false;
 
@@ -194,7 +197,10 @@ namespace Prova
                 {
                     if ((bool)mybutton.IsChecked)
                     {                       
+                        // Retrieves the data from the dictionary.
                         List<DataEntry> samples = csvData[mybutton.ToolTip.ToString().Substring(33)];
+                        // Splits the data into two different lists, one for the UP records, one for the DOWN records,
+                        // in order to plot it with different colors
                         List<DataEntry> up = new();
                         List<DataEntry> down = new();
                         for (int i = 0; i < samples.Count; i++)
@@ -212,7 +218,9 @@ namespace Prova
                                 if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { down.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); up.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); };
                             };
                         }
+                        // The maximum value that is gonna be plotted on the X axis, in seconds.
                         double maxVal = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp();
+                        // Based on the selected timeframe, chooses the step size of each label on the X axis.
                         var step = maxVal switch
                         {
                             <= 10800 => 180,
@@ -226,6 +234,7 @@ namespace Prova
                             <= 3888000 and > 2592000 => 43200,
                             _ => (double)43200,
                         };
+                        // Plots the chart
                         CartesianChart grafico = new()
                         {
                             Width = 4000,
@@ -322,7 +331,7 @@ namespace Prova
                     }
                 }
                 // Iterates over the number of tabs to create.
-                for (int i = 0; i <= (chartcounter-1) / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB; i++) {
+                for (int i = 0; i <= ((chartcounter-1) / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB); i++) {
                     ti.Add(new CloseableTab());
                     ti[i].Content = grids[i]; 
                     ti[i].Title = String.Format("Preview Tab {0}", i + 1);
@@ -641,6 +650,7 @@ namespace Prova
                 }
             }
         }
+        // Adds a button representing a system status to the main view.
         private void AddToWrapPanel(object header, object tag)
         {
             Status1 status = Status1.NOSTATUS ;
@@ -663,6 +673,7 @@ namespace Prova
             {
                 status = csvData[(string)tag].Last().get_status1();
             }
+            // Sets the background color coding based on the system status.
             mybutton.Background = status switch
             {
                 (Status1)0 => Brushes.Red,
@@ -676,9 +687,11 @@ namespace Prova
             {
                 Content = (string)tag
             };
+            // Double click event handler.
             mybutton.AddHandler(ToggleButton.MouseDoubleClickEvent, new RoutedEventHandler(DoubleClick));
             Wrap.Children.Add(mybutton);
         }
+        // Double clicking on a button changes the main view, presenting all the sub-systems of the clicked system.
         private void DoubleClick(object sender, RoutedEventArgs e)
         {
             var button = sender as ToggleButton;
@@ -708,6 +721,8 @@ namespace Prova
                 LookForTvItem((TreeViewItem)item.Items[i], text);
             }
         }
+        // Invoked every time the text inside of the searchbar changes, invokes the function responsible of highlighting 
+        // the matching items on the tree.
         private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (dirTree.Items.Count > 0)
@@ -720,6 +735,7 @@ namespace Prova
                 }
             }
         }
+        // Expands and highlights the tree items matching the searchbar, works recursively.
         private void ExpandTreeItem(TreeViewItem item)
         {
             string text;
@@ -744,15 +760,17 @@ namespace Prova
                 ExpandTreeItem((TreeViewItem)item.Items[i]);
             }
         }
-        public static BitmapImage CreatebitmapImage(string P, int h)
+        // Loads a bitmap image from the given path, with the given height pixels.
+        public static BitmapImage CreatebitmapImage(string path, int height)
         {
             BitmapImage bitmapImage = new();
             bitmapImage.BeginInit();
-            bitmapImage.UriSource = new Uri(P);
-            bitmapImage.DecodePixelHeight = h;
+            bitmapImage.UriSource = new Uri(path);
+            bitmapImage.DecodePixelHeight = height;
             bitmapImage.EndInit();
             return bitmapImage;
         }
+        // Invoked when clicking on the down button on the search bar, cycles downwards on the matching items.
         private void SearchresultsbuttonDown_Click(object sender, RoutedEventArgs e)
         {
             int selectedItems = selectedItemList.Count;
@@ -767,6 +785,7 @@ namespace Prova
                 SelectTreeViewItem((object)dirTree);
             }
         }
+        // Invoked when clicking on the up button on the search bar, cycles upwards on the matching items.
         private void SearchresultsbuttonUp_Click(object sender, RoutedEventArgs e)
         {
             int selectedItems = selectedItemList.Count;
