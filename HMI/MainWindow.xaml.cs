@@ -37,7 +37,6 @@ namespace Prova
     {
         // "Global" constants.
         private static readonly string PREVIEW_TAB_ID = "00";
-        private static readonly string MAINVIEW_TAB_ID = "01";
         private static readonly int PREVIEW_GRAPH_HEIGHT = 150;
         private static readonly int PREVIEW_BTN_HEIGHT = 35;
         private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
@@ -102,7 +101,7 @@ namespace Prova
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     //un po' hardcoded, bisogna capire come passarlo in maniera intelligente
-                    string sbc = mybutton.ToolTip.ToString().Substring(33);
+                    string sbc = mybutton.ToolTip.ToString()[33..];
                     if (!csvData.ContainsKey(sbc)) { continue; }
                     Status1 status = csvData[sbc].Last().get_status1();
                     mybutton.Background = status switch
@@ -199,7 +198,7 @@ namespace Prova
                     if ((bool)mybutton.IsChecked)
                     {                       
                         // Retrieves the data from the dictionary.
-                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString().Substring(33)];
+                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString()[33..]];
                         // Splits the data into two different lists, one for the UP records, one for the DOWN records,
                         // in order to plot it with different colors
                         List<DataEntry> up = new();
@@ -238,7 +237,7 @@ namespace Prova
                         // Plots the chart
                         CartesianChart grafico = new()
                         {
-                            Width = 4000,
+                            Width = 3000,
                             Height = PREVIEW_GRAPH_HEIGHT,
                             Margin = new Thickness(0, PREVIEW_BTN_HEIGHT, 0, 0),
                             ZoomMode = ZoomAndPanMode.X,
@@ -319,7 +318,7 @@ namespace Prova
                         graphpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(grafico);
                         // For every graph, also adds its ToggleButton in the left StackPanel.
                         btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(new ToggleButton()     
-                                                                    {   Content = mybutton.ToolTip.ToString().Substring(33),     
+                                                                    {   Content = mybutton.ToolTip.ToString()[33..],     
                                                                         Margin = new Thickness(10, 0, 0, PREVIEW_GRAPH_HEIGHT), 
                                                                         FontSize = 13,
                                                                         Width = 100,
@@ -347,7 +346,7 @@ namespace Prova
                     svgraph[i].SetValue(Grid.ColumnProperty, 1);
                     tab.Items.Insert(i+1, ti[i]);
                     // Mimics the scrolling of the right panel to the left one.
-                    svgraph[i].ScrollChanged += new ScrollChangedEventHandler(svgraph_ScrollChanged);
+                    svgraph[i].ScrollChanged += new ScrollChangedEventHandler(Svgraph_ScrollChanged);
                 }
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy. 
                 demo = false;
@@ -360,7 +359,7 @@ namespace Prova
                 return;
             }
         }
-        private void svgraph_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        private void Svgraph_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             // This event should only work inside of a Preview Tab.
             var selectedtab = TabControl.SelectedItem as TabItem;
@@ -391,7 +390,7 @@ namespace Prova
                 {
                     if ((bool)mybutton.IsChecked)
                     {
-                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString().Substring(33)];
+                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString()[33..]];
                         List<DataEntry> green = new();
                         List<DataEntry> red = new();
                         for (int i = 0; i < samples.Count; i++)
@@ -479,7 +478,7 @@ namespace Prova
 
                         panel[tabcounter / 10].Children.Add(new ToggleButton()
                         {
-                            Content = mybutton.ToolTip.ToString().Substring(33),
+                            Content = mybutton.ToolTip.ToString()[33..],
                             Margin = new Thickness(10, 0, 0, 0),
                             FontSize = 15,
                             Width = 100,
@@ -544,7 +543,7 @@ namespace Prova
             return dateTime;
         }
         // Opens the .csv file and reads its data into a dictionary. 
-        private void Import_CSV(string filePath, Dictionary<string, List<DataEntry>> csvData)
+        private static void Import_CSV(string filePath, Dictionary<string, List<DataEntry>> csvData)
         {
             try
             {
@@ -615,7 +614,7 @@ namespace Prova
                 //Loop through the child nodes.
                 {
                     xNode = xmlNode.ChildNodes[x];
-                    TreeViewItem nuovoNodo = new TreeViewItem();
+                    TreeViewItem nuovoNodo = new();
                     var sys = xNode.Attributes["sys"].Value.ToString();
                     var sbc = xNode.Attributes["SBC"].Value.ToString();
                     nuovoNodo.Header = sys;
