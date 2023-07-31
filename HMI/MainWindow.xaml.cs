@@ -42,8 +42,8 @@ namespace Prova
         private readonly Dictionary<string, List<DataEntry>> csvData = new();
         private readonly List<TreeViewItem> selectedItemList = new();
         private static readonly string PREVIEW_TAB_ID = "00";
-        private static readonly int PREVIEW_GRAPH_HEIGHT = 200; 
-        private static readonly int PREVIEW_BTN_HEIGHT = 40;
+        private static readonly int PREVIEW_GRAPH_HEIGHT = 150; 
+        private static readonly int PREVIEW_BTN_HEIGHT = 35;
         private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
         private int selectedItemIndex = -1;
         private bool demo = false;
@@ -226,7 +226,6 @@ namespace Prova
                             <= 3888000 and > 2592000 => 43200,
                             _ => (double)43200,
                         };
-
                         CartesianChart grafico = new()
                         {
                             Width = 4000,
@@ -281,7 +280,7 @@ namespace Prova
                             Grid grid = new();
                             ColumnDefinition c1 = new()
                             {
-                                Width = new GridLength(120)
+                                Width = GridLength.Auto
                             };
                             ColumnDefinition c2 = new()
                             {
@@ -302,7 +301,8 @@ namespace Prova
                             svgraph.Add(new ScrollViewer()
                             {
                                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                Margin = new Thickness(10, 0, 0, 0)
                             });
                         }
                         // Adds each graph into the right StackPanel.
@@ -310,8 +310,8 @@ namespace Prova
                         // For every graph, also adds its ToggleButton in the left StackPanel.
                         btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(new ToggleButton()     
                                                                     {   Content = mybutton.ToolTip.ToString().Substring(33),     
-                                                                        Margin = new Thickness(20, 0, 0, PREVIEW_GRAPH_HEIGHT), 
-                                                                        FontSize = 15,
+                                                                        Margin = new Thickness(10, 0, 0, PREVIEW_GRAPH_HEIGHT), 
+                                                                        FontSize = 13,
                                                                         Width = 100,
                                                                         Height = PREVIEW_BTN_HEIGHT,
                                                                         HorizontalAlignment = HorizontalAlignment.Left,
@@ -599,7 +599,6 @@ namespace Prova
                 //Loop through the child nodes.
                 {
                     xNode = xmlNode.ChildNodes[x];
-
                     TreeViewItem nuovoNodo = new TreeViewItem();
                     var sys = xNode.Attributes["sys"].Value.ToString();
                     var sbc = xNode.Attributes["SBC"].Value.ToString();
