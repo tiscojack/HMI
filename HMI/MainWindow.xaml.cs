@@ -288,7 +288,7 @@ namespace Prova
                             };
                             ColumnDefinition c2 = new()
                             {
-                                Width = new GridLength(950)
+                                Width = new GridLength(1, GridUnitType.Star)
                             };
                             grid.ColumnDefinitions.Add(c1);
                             grid.ColumnDefinitions.Add(c2);
@@ -529,7 +529,7 @@ namespace Prova
                 k++;
             }
         }
-        // Utils
+        // Returns a DateTime object from a unix timestamp.
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch.

@@ -23,7 +23,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition
-                Width="200"
+                Width="300"
                 MinWidth="150"
                 MaxWidth="800" />
             <ColumnDefinition Width="5" />
@@ -204,8 +204,9 @@
                 <TabItem
                     x:Name="mainview"
                     MinHeight="30"
-                    Header="Main View">
-                    <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto" Tag="01">
+                    Header="Main View"
+                    Tag="01">
+                    <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto">
                         <WrapPanel
                             Name="Wrap"
                             Grid.Column="2"
