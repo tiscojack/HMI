@@ -35,19 +35,20 @@ namespace Prova
     }
     public partial class MainWindow : Window
     {
+        // "Global" constants.
         private static readonly string PREVIEW_TAB_ID = "00";
         private static readonly string MAINVIEW_TAB_ID = "01";
         private static readonly int PREVIEW_GRAPH_HEIGHT = 150;
         private static readonly int PREVIEW_BTN_HEIGHT = 35;
         private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
-
+        // Path to the input files.
         private static readonly string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
         private static readonly string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
         private static readonly string imagePath = "pack://application:,,,/resources/Rina2.bmp";
-
+        // Declaration of "global" structures.
         private readonly Dictionary<string, List<DataEntry>> csvData = new();
         private readonly List<TreeViewItem> selectedItemList = new();
-
+        // "Global" variables
         private int selectedItemIndex = -1;
         private bool demo = false;
 
@@ -556,17 +557,20 @@ namespace Prova
                     csvData = null;
                     return;
                 }
-                
+                // Reads the whole .csv file into a string.
                 StreamReader sR = new(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 string allFile = sR.ReadToEnd();
                 sR.Close();
-                var lines = allFile.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                // Splits the string into an array of strings, each string is one line of the file.
+                string[] lines = allFile.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
                 string line;
                 int i = 0;
+                // Iterates over every line.
                 while (i < lines.Length)
                 {
                     line = lines[i++];
+                    // Further splits each line on every csv separator (in this file it's ';')
                     var splittedLine = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     Status1 status1 = splittedLine[3] switch
                     {
