@@ -125,7 +125,41 @@ namespace Prova
                 return;
             };
         }
+        private void GenerateChartData()
+        {
+            List<string> keysList;
+            List<DataEntry> system;
+            int i, j, stop, _salt, updown, numDataItems;
+            Random rand;
+            Status1 stat1;
 
+            lock (csvData)
+            {
+                keysList = csvData.Keys.ToList();
+                foreach (string key in keysList)
+                {
+                    i = 0;
+                    j = 0;
+                    system = csvData[key];
+                    numDataItems = system.Count;
+                    while (i < numDataItems)
+                    {
+                        rand = new Random();
+                        _salt = rand.Next();
+                        updown = _salt % 2;
+                        stat1 = (Status1)(_salt % 5);
+                        stop = j + (_salt % 200);
+                        while ((j < stop) && (j < numDataItems))
+                        {
+                            system[j].set_status(Convert.ToBoolean(updown));
+                            system[j].set_status1(stat1);
+                            j++;
+                        }
+                        i = j;
+                    }
+                }
+            }
+        }
         private void Demo()
         {
             if (demo)
@@ -161,8 +195,8 @@ namespace Prova
                 TabControl tab = DocPanel;
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
-                
                 List<CloseableTab> ti = new();
+                GenerateChartData();
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -248,12 +282,11 @@ namespace Prova
                                                                         Margin = new Thickness(10, 0, 0, 0), 
                                                                         FontSize = 15,
                                                                         Width = 100,
-                                                                        Height = 50,
+                                                                        Height = 40,
                                                                         HorizontalAlignment = HorizontalAlignment.Left,
                                                                     });
 
-                        this.AddHandler(UIElement.MouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent));
-                        
+                        this.AddHandler(UIElement.PreviewMouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent), true);
                         panel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
@@ -261,6 +294,7 @@ namespace Prova
                 for (int i = 0; i <= (tabcounter-1) / 10; i++) {
                     ti.Add(new CloseableTab());
                     ti[i].Content = sv[i];
+                    sv[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
                     sv[i].Content = panel[i];
 
                     ti[i].Title = String.Format("Preview Tab {0}", i+1);
@@ -277,6 +311,11 @@ namespace Prova
                 MessageBox.Show(ex.ToString());
                 return;
             }
+        }
+
+        private void IgnoreWheelEvent(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
@@ -375,7 +414,7 @@ namespace Prova
                             {
                                 VerticalScrollBarVisibility =
                                                             ScrollBarVisibility.Auto,
-                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
                             });
                         }
 
