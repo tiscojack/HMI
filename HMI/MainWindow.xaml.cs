@@ -44,6 +44,7 @@ namespace Prova
         private static readonly string PREVIEW_TAB_ID = "00";
         private static readonly int PREVIEW_GRAPH_HEIGHT = 200; 
         private static readonly int PREVIEW_BTN_HEIGHT = 40;
+        private static readonly int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
         private int selectedItemIndex = -1;
         private bool demo = false;
 
@@ -183,12 +184,11 @@ namespace Prova
         {
             try
             {
-                int tabcounter = 0;
+                int chartcounter = 0;
                 TabControl tab = TabControl;
                 List<Grid> grids = new();
                 List<StackPanel> graphpanel = new();
                 List<StackPanel> btnpanel = new();
-                List<ScrollViewer> sv = new();
                 List<ScrollViewer> svgraph = new();
                 List<ScrollViewer> svbtn = new();
                 List<CloseableTab> ti = new();
@@ -278,20 +278,9 @@ namespace Prova
                             YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
                         // Adds a new tab every 10 graphs. 
-                        if (tabcounter % 10 == 0) 
-                        { 
-                            graphpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
-                            btnpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
-                            svbtn.Add(new ScrollViewer()
-                            {
-                                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
-                                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
-                            });
-                            svgraph.Add(new ScrollViewer()
-                            {
-                                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
-                            });
+                        if (chartcounter % NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB == 0) 
+                        {
+                            // Each tab is composed by a grid, with two columns
                             Grid grid = new();
                             ColumnDefinition c1 = new()
                             {
@@ -304,8 +293,25 @@ namespace Prova
                             grid.ColumnDefinitions.Add(c1);
                             grid.ColumnDefinitions.Add(c2);
                             grids.Add(grid);
+                            // The left column is a stackpanel where we will insert the buttons.
+                            btnpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
+                            svbtn.Add(new ScrollViewer()
+                            {
+                                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                            });
+                            // The left column is a stackpanel where we will insert the graphs.
+                            graphpanel.Add(new StackPanel() { Orientation = Orientation.Vertical });
+                            svgraph.Add(new ScrollViewer()
+                            {
+                                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+                            });
                         }
-                        btnpanel[tabcounter / 10].Children.Add(new ToggleButton()     
+                        // Adds each graph into the right StackPanel.
+                        graphpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(grafico);
+                        // For every graph, also adds its ToggleButton in the left StackPanel.
+                        btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(new ToggleButton()     
                                                                     {   Content = mybutton.ToolTip.ToString().Substring(33),     
                                                                         Margin = new Thickness(20, 0, 0, PREVIEW_GRAPH_HEIGHT), 
                                                                         FontSize = 15,
@@ -313,25 +319,27 @@ namespace Prova
                                                                         Height = PREVIEW_BTN_HEIGHT,
                                                                         HorizontalAlignment = HorizontalAlignment.Left,
                                                                     });
+                        // Attaches to the whole window the event handler that manages the zooming of charts.
                         this.AddHandler(UIElement.PreviewMouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent), true);
-                        graphpanel[tabcounter / 10].Children.Add(grafico);
-                        tabcounter++;
+                        chartcounter++;
                     }
                 }
-                for (int i = 0; i <= (tabcounter-1) / 10; i++) {
+                // Iterates over the number of tabs to create.
+                for (int i = 0; i <= (chartcounter-1) / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB; i++) {
                     ti.Add(new CloseableTab());
                     ti[i].Content = grids[i]; 
                     ti[i].Title = String.Format("Preview Tab {0}", i + 1);
                     ti[i].Tag = PREVIEW_TAB_ID;
-                    svgraph[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
-                    svbtn[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
-                    svbtn[i].Content = btnpanel[i];
+                    svgraph[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheel);
+                    svbtn[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheel);
                     grids[i].Children.Add(svbtn[i]);
+                    svbtn[i].Content = btnpanel[i];
                     svbtn[i].SetValue(Grid.ColumnProperty, 0);
                     grids[i].Children.Add(svgraph[i]);
                     svgraph[i].Content = graphpanel[i];
                     svgraph[i].SetValue(Grid.ColumnProperty, 1);
                     tab.Items.Insert(i+1, ti[i]);
+                    // Mimics the scrolling of the right panel to the left one.
                     svgraph[i].ScrollChanged += new ScrollChangedEventHandler(svgraph_ScrollChanged);
                 }
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy. 
@@ -347,15 +355,19 @@ namespace Prova
         }
         private void svgraph_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (e.VerticalChange == 0) { return; }
+            // This event should only work inside of a Preview Tab.
             var selectedtab = TabControl.SelectedItem as TabItem;
             if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID) { return; }
+            // Only looking for vertical scrolling, if there is none, return.
+            if (e.VerticalChange == 0) { return; }
             var svgraph = sender as ScrollViewer;
             var grid = TabControl.SelectedContent as Grid;
             var svbtn = grid.Children[0] as ScrollViewer;
+            // Moves the left scrollbar to the same offset of the right one.
             svbtn.ScrollToVerticalOffset(svgraph.VerticalOffset);
         }
-        private void IgnoreWheelEvent(object sender, MouseWheelEventArgs e)
+        // Used to override the normal scrolling with mouse wheel.
+        private void IgnoreWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
         }
@@ -367,7 +379,6 @@ namespace Prova
                 TabControl tab = TabControl;
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
-
                 List<CloseableTab> ti = new();
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
@@ -495,6 +506,7 @@ namespace Prova
         // Propagates the MouseWheel event to all the selected preview graphs.
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
+            // This event should only work inside of a Preview Tab.
             var selectedtab = TabControl.SelectedItem as TabItem;
             if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID) { return; }
             var grid = TabControl.SelectedContent as Grid;
@@ -503,14 +515,10 @@ namespace Prova
             var graphpanel = svgraph.Content as StackPanel;
             var btnpanel = svbtn.Content as StackPanel;
             bool zoom = true;
-            int k = 0;
-            foreach (var child in btnpanel.Children)
+            int k = 0; //used to track the index of the chart.
+            foreach (ToggleButton btn in btnpanel.Children)
             {
-                if (child.GetType().ToString() == "System.Windows.Controls.Primitives.ToggleButton")
-                {
-                    var btn = child as ToggleButton;
-                    zoom = (bool)btn.IsChecked;
-                } 
+                zoom = (bool)btn.IsChecked;
                 if (zoom) 
                 {   
                     var graph = graphpanel.Children[k] as CartesianChart;

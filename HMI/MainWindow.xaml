@@ -142,7 +142,7 @@
                 Background="Transparent"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto"
-                PreviewMouseWheel="IgnoreWheelEvent">
+                PreviewMouseWheel="IgnoreWheel">
                 <TreeView
                     Name="dirTree"
                     HorizontalAlignment="Stretch"
