@@ -197,14 +197,14 @@
             Grid.Row="1"
             Grid.Column="2">
             <TabControl
-                x:Name="DocPanel"
+                x:Name="TabControl"
                 Grid.Column="2"
                 Background="#F5F5F5">
                 <TabItem
                     x:Name="mainview"
                     MinHeight="30"
                     Header="Main View">
-                    <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto" Tag="01">
                         <WrapPanel
                             Name="Wrap"
                             Grid.Column="2"

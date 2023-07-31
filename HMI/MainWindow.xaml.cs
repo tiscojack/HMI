@@ -43,6 +43,8 @@ namespace Prova
         int selectedItemIndex = -1; 
         Dictionary<string, List<DataEntry>> csvData = new();
         private static readonly string PREVIEW_TAB_ID = "00";
+        private static readonly int PREVIEW_GRAPH_HEIGHT = 200; 
+        private static readonly int PREVIEW_BTN_HEIGHT = 40;
 
         public MainWindow()
         {
@@ -192,9 +194,12 @@ namespace Prova
             try
             {
                 int tabcounter = 0;
-                TabControl tab = DocPanel;
-                List<StackPanel> panel = new();
+                TabControl tab = TabControl;
+                List<Grid> grids = new();
+                List<StackPanel> graphpanel = new();
+                List<StackPanel> btnpanel = new();
                 List<ScrollViewer> sv = new();
+                List<ScrollViewer> svgraph = new();
                 List<CloseableTab> ti = new();
                 GenerateChartData();
                 foreach (ToggleButton mybutton in Wrap.Children)
@@ -237,13 +242,16 @@ namespace Prova
                         CartesianChart grafico = new()
                         {
                             Width = 4000,
-                            Height = 200,
+                            Height = PREVIEW_GRAPH_HEIGHT,
+                            Margin = new Thickness(0, PREVIEW_BTN_HEIGHT, 0, 0),
                             ZoomMode = ZoomAndPanMode.X,
+                            TooltipFindingStrategy = TooltipFindingStrategy.CompareOnlyX,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
                                 new StepLineSeries<DataEntry>()
                                 {
+                                    Name = "UP",
                                     Values = up,
                                     Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 3 },
                                     GeometrySize = 0,
@@ -251,10 +259,15 @@ namespace Prova
                                     {
                                         chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
-                                    }
+                                    },
+                                    XToolTipLabelFormatter =
+                                        (chartPoint) => $"{UnixTimeStampToDateTime(chartPoint.SecondaryValue + samples[0].get_unixtimestamp())}",
+                                    YToolTipLabelFormatter =
+                                        (chartPoint) => $""
                                 },
                                 new StepLineSeries<DataEntry>()
                                 {
+                                    Name = "DOWN",
                                     Values = down,
                                     Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 3 },
                                     GeometrySize = 0,
@@ -262,32 +275,56 @@ namespace Prova
                                     {
                                         chartPoint.PrimaryValue = sample.get_status() ? 1 : 0;
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
-                                    }
+                                    },
+                                    XToolTipLabelFormatter =
+                                        (chartPoint) => $"{UnixTimeStampToDateTime(chartPoint.SecondaryValue + samples[0].get_unixtimestamp())}",
+                                    YToolTipLabelFormatter =
+                                        (chartPoint) => $"",
+                                    
                                 }
                             },
                             XAxes = new List<Axis> { new Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
                             YAxes = new List<Axis> { new Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
-                        
                         // Adds a new tab every 10 graphs 
                         if (tabcounter % 10 == 0) 
                         { 
-                            panel.Add(new StackPanel() { Orientation = Orientation.Vertical });
-                            sv.Add(new ScrollViewer() { VerticalScrollBarVisibility = 
-                                                            ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
+                            graphpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
+                            btnpanel.Add(new StackPanel() { Orientation = Orientation.Vertical});
+                            sv.Add(new ScrollViewer()
+                            {
+                                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                            });
+                            svgraph.Add(new ScrollViewer()
+                            {
+                                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                MaxWidth = 920,
+                            });
+                            Grid grid = new();
+                            ColumnDefinition c1 = new()
+                            {
+                                Width = new GridLength(120)
+                            };
+                            ColumnDefinition c2 = new()
+                            {
+                                Width = GridLength.Auto
+                            };
+                            grid.ColumnDefinitions.Add(c1);
+                            grid.ColumnDefinitions.Add(c2);
+                            grids.Add(grid);
                         }
-                        
-                        panel[tabcounter / 10].Children.Add(new ToggleButton()     
+                        btnpanel[tabcounter / 10].Children.Add(new ToggleButton()     
                                                                     {   Content = mybutton.ToolTip.ToString().Substring(33),     
-                                                                        Margin = new Thickness(10, 0, 0, 0), 
+                                                                        Margin = new Thickness(20, 0, 0, PREVIEW_GRAPH_HEIGHT), 
                                                                         FontSize = 15,
                                                                         Width = 100,
-                                                                        Height = 40,
+                                                                        Height = PREVIEW_BTN_HEIGHT,
                                                                         HorizontalAlignment = HorizontalAlignment.Left,
                                                                     });
-
                         this.AddHandler(UIElement.PreviewMouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent), true);
-                        panel[tabcounter / 10].Children.Add(grafico);
+                        graphpanel[tabcounter / 10].Children.Add(grafico);
                         tabcounter++;
                     }
                 }
@@ -295,8 +332,12 @@ namespace Prova
                     ti.Add(new CloseableTab());
                     ti[i].Content = sv[i];
                     sv[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheelEvent);
-                    sv[i].Content = panel[i];
-
+                    sv[i].Content = grids[i];
+                    grids[i].Children.Add(btnpanel[i]);
+                    btnpanel[i].SetValue(Grid.ColumnProperty, 0);
+                    grids[i].Children.Add(svgraph[i]);
+                    svgraph[i].Content = graphpanel[i];
+                    svgraph[i].SetValue(Grid.ColumnProperty, 1);
                     ti[i].Title = String.Format("Preview Tab {0}", i+1);
                     sv[i].Tag = PREVIEW_TAB_ID;
                     tab.Items.Insert(i+1, ti[i]);
@@ -323,7 +364,7 @@ namespace Prova
             try
             {
                 int tabcounter = 0;
-                TabControl tab = DocPanel;
+                TabControl tab = TabControl;
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
 
@@ -454,24 +495,29 @@ namespace Prova
         // Propagates the MouseWheel event to all the selected preview graphs
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
-            var sv = DocPanel.SelectedContent as ScrollViewer;
+            var sv = TabControl.SelectedContent as ScrollViewer;
             if (sv.Tag.ToString() != "00") { return; }
-            var panel = sv.Content as StackPanel;
+            var grid = sv.Content as Grid;
+            var btnpanel = grid.Children[0] as StackPanel;
+            var svgraph = grid.Children[1] as ScrollViewer;
+            var graphpanel = svgraph.Content as StackPanel;
             bool zoom = true;
-            foreach (var child in panel.Children)
+            int k = 0;
+            foreach (var child in btnpanel.Children)
             {
-                // loop dispari
                 if (child.GetType().ToString() == "System.Windows.Controls.Primitives.ToggleButton")
                 {
                     var btn = child as ToggleButton;
                     zoom = (bool)btn.IsChecked;
-                }  else if (zoom) //loop dispari (condizionale)
+                } 
+                if (zoom) 
                 {   
-                    var graph = child as CartesianChart;
+                    var graph = graphpanel.Children[k] as CartesianChart;
                     var core = graph.CoreChart as CartesianChart<SkiaSharpDrawingContext>;
                     Point position = e.GetPosition(this);
                     core.Zoom(new LvcPoint((float)position.X, (float)position.Y), (e.Delta <= 0) ? ZoomDirection.ZoomOut : ZoomDirection.ZoomIn);
                 }
+                k++;
             }
         }
 
@@ -593,7 +639,7 @@ namespace Prova
                             AddToWrapPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
-                    Dispatcher.BeginInvoke((Action)(() => DocPanel.SelectedItem = mainview));
+                    Dispatcher.BeginInvoke((Action)(() => TabControl.SelectedItem = mainview));
                 }
             }
         }
