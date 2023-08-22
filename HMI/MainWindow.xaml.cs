@@ -40,6 +40,7 @@ namespace Prova
         private const int PREVIEW_BTN_HEIGHT = 35;
         private const int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
         private const string PREVIEW_TAB_ID = "00";
+        private const string EXPORT_TAB_ID = "02";
         // Path to the input files.
         private static readonly string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
         private static readonly string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
@@ -406,6 +407,7 @@ namespace Prova
         {
             try
             {
+                int chartcounter = 0;
                 int tabcounter = 0;
                 int counter = 0;
                 TabControl tab = TabControl;
@@ -554,6 +556,7 @@ namespace Prova
                 for (int i = 0; i <= (tabcounter - 1) / 10; i++)
                 {
                     ti.Add(new CloseableTab());
+                    ti[i].Tag = EXPORT_TAB_ID;
                     ti[i].Content = sv[i];
                     sv[i].Content = panel[i];
 
