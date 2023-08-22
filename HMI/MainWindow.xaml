@@ -102,6 +102,7 @@
                         <MenuItem Click="Preview_Click" Header="Preview" />
                         <MenuItem Click="Export_Click" Header="Export" />
                         <MenuItem Click="Demo_Click" Header="Demo" />
+                        <MenuItem Click="Save_Click" Header="Save" />
                         <Separator />
                         <MenuItem Header="Settings" />
                         <Separator />
