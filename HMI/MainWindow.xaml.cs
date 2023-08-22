@@ -541,16 +541,10 @@ namespace Prova
                                 HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
                             });
                         }
-
-
-                        
                         panel[tabcounter / 10].Children.Add(grafico);
                         list_charts.Add(grafico);
                         tabcounter++;
-
                     }
-
-
                 }
 
                 for (int i = 0; i <= (tabcounter - 1) / 10; i++)
@@ -559,7 +553,7 @@ namespace Prova
                     ti[i].Tag = EXPORT_TAB_ID;
                     ti[i].Content = sv[i];
                     sv[i].Content = panel[i];
-
+                    sv[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheel);
                     ti[i].Title = String.Format("Export Tab {0}", i + 1);
                     tab.Items.Insert(i + 1, ti[i]);
                 }
@@ -567,8 +561,6 @@ namespace Prova
                 demo = false;
                 // Sets the selected tab to the first of the newly inserted ones
                 Dispatcher.BeginInvoke((System.Action)(() => tab.SelectedIndex = 1));
-
-
             }
             catch (Exception ex)
             {
