@@ -37,9 +37,10 @@ namespace Prova
         // "Global" constants.
         private const int TIMER_TICK_SECONDS = 1;
         private const int PREVIEW_GRAPH_HEIGHT = 150;
+        private const int EXPORT_GRAPH_HEIGHT = 400;
         private const int PREVIEW_BTN_HEIGHT = 35;
         private const int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
-        private const int NUMBER_OF_CHARTS_IN_A_EXPORT_TAB = 10;
+        private const int NUMBER_OF_CHARTS_IN_A_EXPORT_TAB = 6;
         private const string PREVIEW_TAB_ID = "00";
         private const string EXPORT_TAB_ID = "02";
         // Path to the input files.
@@ -307,7 +308,7 @@ namespace Prova
                             XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value / 60}m", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
                             YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 10, MinLimit = 0, MaxLimit = 1, Labels = new string[] { "DOWN", "UP" } } }
                         };
-                        // Adds a new tab every 10 graphs. 
+                        
                         if (chartcounter % NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB == 0) 
                         {
                             // Each tab is composed by a grid, with two columns
@@ -476,8 +477,8 @@ namespace Prova
 
                         CartesianChart grafico = new()
                         {
-                            Width = 60000,
-                            Height = 400,
+                            Width = 40000,
+                            Height = EXPORT_GRAPH_HEIGHT,
                             ZoomMode = ZoomAndPanMode.X,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
@@ -533,7 +534,7 @@ namespace Prova
                         };
 
                         // Adds a new tab every 10 graphs. 
-                        if (chartcounter % NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB == 0)
+                        if (chartcounter % NUMBER_OF_CHARTS_IN_A_EXPORT_TAB == 0)
                         {
                             // Each tab is composed by a grid, with two columns
                             Grid grid = new();
@@ -565,12 +566,12 @@ namespace Prova
                             });
                         }
                         // Adds each graph into the right StackPanel.
-                        graphpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(grafico);
+                        graphpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_EXPORT_TAB].Children.Add(grafico);
                         // For every graph, also adds its ToggleButton in the left StackPanel.
-                        btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB].Children.Add(new ToggleButton()
+                        btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_EXPORT_TAB].Children.Add(new ToggleButton()
                         {
                             Content = mybutton.ToolTip.ToString()[33..],
-                            Margin = new Thickness(10, 0, 0, PREVIEW_GRAPH_HEIGHT),
+                            Margin = new Thickness(10, 0, 0, EXPORT_GRAPH_HEIGHT),
                             FontSize = 13,
                             Width = 100,
                             Height = PREVIEW_BTN_HEIGHT,
@@ -583,7 +584,7 @@ namespace Prova
                     }
                 }
                 // Iterates over the number of tabs to create.
-                for (int i = 0; i <= ((chartcounter - 1) / NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB); i++)
+                for (int i = 0; i <= ((chartcounter - 1) / NUMBER_OF_CHARTS_IN_A_EXPORT_TAB); i++)
                 {
                     ti.Add(new CloseableTab());
                     ti[i].Content = grids[i];
