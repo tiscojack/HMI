@@ -26,6 +26,8 @@ using ExcelClass;
 using System.Runtime.InteropServices;
 using Microsoft.Office.Interop.Excel;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Diagnostics.Eventing.Reader;
+
 namespace Prova
 {
    
@@ -49,6 +51,11 @@ namespace Prova
         int selectedItemIndex = -1; 
         Dictionary<string, List<DataEntry>> csvData = new();
         private static readonly string PREVIEW_TAB_ID = "00";
+        List<CartesianChart> list_charts = new List<CartesianChart>();
+        List<string> list_images = new List<string>();
+        List<string> list_titles = new List<string>();
+        string folder_path = @"C:\Users\lenovo\source\repos\HMIver2\HMI\bin\Debug\net6.0-windows";
+
 
         public MainWindow()
         {
@@ -285,19 +292,27 @@ namespace Prova
             }
         }
 
+        // Show preview of charts to be export
         private void Export_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                if(list_charts.Count != 0)
+                {
+                    list_charts.Clear();
+                }
+
+                if (list_images.Count != 0)
+                {
+                    list_images.Clear();
+                }
+
                 int tabcounter = 0;
                 TabControl tab = DocPanel;
                 List<StackPanel> panel = new();
                 List<ScrollViewer> sv = new();
-
                 List<CloseableTab> ti = new();
 
-                List<CartesianChart> list_charts = new List<CartesianChart>();
-                List<string> list_titles = new List<string>();
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -311,18 +326,26 @@ namespace Prova
                             {
                                 green.Add(samples[i]);
                                 red.Add(null);
-                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { green.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); red.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); };
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) 
+                                { 
+                                    green.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); 
+                                    red.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), true, samples[i + 1].get_status1())); 
+                                };
                             }
                             else
                             {
                                 red.Add(samples[i]);
                                 green.Add(null);
-                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) { red.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); green.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); };
+                                if (i < (samples.Count - 1) && samples[i].get_status() != samples[i + 1].get_status()) 
+                                { 
+                                    red.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); 
+                                    green.Add(new DataEntry(samples[i + 1].get_unixtimestamp(), false, samples[i + 1].get_status1())); 
+                                };
                             };
                         }
                         double maxVal = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp();
 
-                        
+
                         CartesianChart grafico = new()
                         {
                             Width = 60000,
@@ -334,9 +357,9 @@ namespace Prova
                                 new StepLineSeries<DataEntry>()
                                 {
                                     Values = green,
-                                    Name = mybutton.ToolTip.ToString().Substring(33),
                                     Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 0 },
                                     Fill = new SolidColorPaint(SKColors.Green),
+                                    
                                     GeometrySize = 0,
                                     Mapping = (sample, chartPoint) =>
                                     {
@@ -372,12 +395,15 @@ namespace Prova
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
                                     }
                                 }
+                                
                             },
-                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal + 50}, },
-                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 10, MinLimit = 0, MaxLimit = 6, Labels = new string[] {"", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE" }, }, }
+                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> 
+                            { 
+                                new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal}, },
+                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 15, MinLimit = 0, MaxLimit = 7, Labels = new string[] { "", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE", "", mybutton.ToolTip.ToString().Substring(33) }, }, }
                         };
 
-                        
+
 
                         // Adds a new tab every 10 graphs 
                         if (tabcounter % 10 == 0)
@@ -391,18 +417,20 @@ namespace Prova
                             });
                         }
 
-                        panel[tabcounter / 10].Children.Add(new System.Windows.Controls.TextBox()
+                        /*panel[tabcounter / 10].Children.Add(new System.Windows.Controls.TextBox()
                         {
                             Text = mybutton.ToolTip.ToString().Substring(33),
                             FontSize = 15,
                             HorizontalAlignment = HorizontalAlignment.Left,
-                        });
-                        list_titles.Add(mybutton.ToolTip.ToString().Substring(33));
+                        });*/
+                        
                         panel[tabcounter / 10].Children.Add(grafico);
                         list_charts.Add(grafico);
                         tabcounter++;
-                        
+
                     }
+
+
                 }
 
                 for (int i = 0; i <= (tabcounter - 1) / 10; i++)
@@ -411,25 +439,13 @@ namespace Prova
                     ti[i].Content = sv[i];
                     sv[i].Content = panel[i];
 
-                    ti[i].Title = String.Format("Preview Tab {0}", i + 1);
+                    ti[i].Title = String.Format("Export Tab {0}", i + 1);
                     tab.Items.Insert(i + 1, ti[i]);
                 }
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy 
                 demo = false;
                 // Sets the selected tab to the first of the newly inserted ones
                 Dispatcher.BeginInvoke((System.Action)(() => tab.SelectedIndex = 1));
-
-                
-                string folder_path = @"C:\Users\lenovo\source\repos\HMIver2\HMI\bin\Debug\net6.0-windows";
-                List<string> list_images = new List<string>();
-                for (int i = 0; i < list_charts.Count; i++)
-                {
-                    string image = CreateImageFromCartesianChart(folder_path, list_charts[i], i);
-                    list_images.Add(image);
-                }
-
-                ExportImageToExcel(list_images, list_titles);
-               
 
 
             }
@@ -440,9 +456,237 @@ namespace Prova
             }
         }
 
+        // Prepare zoom charts to be export
+        private void RedrawChart(double min_value, double max_value)
+        {
+            try
+            {
+                if (list_charts.Count != 0)
+                {
+                    list_charts.Clear();
+                }
+
+                if (list_images.Count != 0)
+                {
+                    list_images.Clear();
+                }
+
+                double maxVal;
+                
+                foreach (ToggleButton mybutton in Wrap.Children)
+                {
+                    if ((bool)mybutton.IsChecked)
+                    {
+                        List<DataEntry> samples = csvData[mybutton.ToolTip.ToString().Substring(33)];
+                        List<DataEntry> green = new();
+                        List<DataEntry> red = new();
+                        List<DataEntry> new_samples = new();
+                        for (int i = 0; i < samples.Count; i++)
+                        {
+                            if (samples[i].get_unixtimestamp() >= min_value && samples[i].get_unixtimestamp() <= max_value)
+                            {
+                                new_samples.Add(samples[i]);
+                            }
+                        }
+
+                        for (int i = 0; i < new_samples.Count; i++)
+                        {
+                             if (new_samples[i].get_status())
+                            {
+                                green.Add(new_samples[i]);
+                                red.Add(null);
+                                if (i < (new_samples.Count - 1) && new_samples[i].get_status() != new_samples[i + 1].get_status()) 
+                                { 
+                                    green.Add(new DataEntry(new_samples[i + 1].get_unixtimestamp(), true, new_samples[i + 1].get_status1())); 
+                                    red.Add(new DataEntry(new_samples[i + 1].get_unixtimestamp(), true, new_samples[i + 1].get_status1())); 
+                                };
+                            }
+                            else
+                            {
+                                red.Add(new_samples[i]);
+                                green.Add(null);
+                                if (i < (new_samples.Count - 1) && new_samples[i].get_status() != new_samples[i + 1].get_status()) 
+                                {
+                                    red.Add(new DataEntry(new_samples[i + 1].get_unixtimestamp(), false, new_samples[i + 1].get_status1())); 
+                                    green.Add(new DataEntry(new_samples[i + 1].get_unixtimestamp(), false, new_samples[i + 1].get_status1())); 
+                                };
+                            };
+
+                        }
+                        maxVal = new_samples.Last().get_unixtimestamp() - new_samples.First().get_unixtimestamp();
+                       
+                        var step = maxVal switch
+                        {
+                            <= 112 => 10,
+                            <= 225 and > 112 => 30,
+                            <= 450 and > 225 => 60,
+                            <= 900 and > 450 => 120,
+                            <= 1800 and > 900 => 180,
+                            <= 3600 and > 1800 => 300,
+                            _ => (double)300,
+                        };
+
+                        CartesianChart grafico = new()
+                        {
+                            Width = 60000,
+                            Height = 400,
+                            ZoomMode = ZoomAndPanMode.X,
+                            HorizontalAlignment = HorizontalAlignment.Left,
+                            Series = new[]
+                            {
+                                new StepLineSeries<DataEntry>()
+                                {
+                                    Values = green,
+                                    Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 0 },
+                                    Fill = new SolidColorPaint(SKColors.Green),
+                                    
+                                    GeometrySize = 0,
+                                    Mapping = (sample, chartPoint) =>
+                                    {
+                                        chartPoint.PrimaryValue = sample.get_status1() switch
+                                        {
+                                            (Status1)0 => 1,
+                                            (Status1)1 => 2,
+                                            (Status1)2 => 3,
+                                            (Status1)3 => 4,
+                                            (Status1)4 => 5,
+                                            _ => 6,
+                                        };
+                                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - new_samples[0].get_unixtimestamp();
+                                    }
+                                },
+                                new StepLineSeries<DataEntry>()
+                                {
+                                    Values = red,
+                                    Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 0 },
+                                    Fill = new SolidColorPaint(SKColors.Red),
+                                    GeometrySize = 0,
+                                    Mapping = (sample, chartPoint) =>
+                                    {
+                                        chartPoint.PrimaryValue = sample.get_status1() switch
+                                        {
+                                            (Status1)0 => 1,
+                                            (Status1)1 => 2,
+                                            (Status1)2 => 3,
+                                            (Status1)3 => 4,
+                                            (Status1)4 => 5,
+                                            _ => 6,
+                                        };
+                                        chartPoint.SecondaryValue = sample.get_unixtimestamp() - new_samples[0].get_unixtimestamp();
+                                    }
+                                }
+                            },
+                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}s", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
+                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 15, MinLimit = 0, MaxLimit = 7, Labels = new string[] { "", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE", "", mybutton.ToolTip.ToString().Substring(33)}, }, }
+                        };
+
+                        list_charts.Add(grafico);
+
+                    }
+                }
+
+                for (int i = 0; i < list_charts.Count; i++)
+                {
+                    string image = CreateImageFromCartesianChart(folder_path, list_charts[i], i);
+                    list_images.Add(image);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return;
+            }
+        }
+
+        // Check data before export and export charts
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            if(list_charts.Count == 0)
+            {
+                MessageBox.Show("Before saving, run the export");
+                return;
+            }
+
+            double min_value = 0;
+            double max_value = 0;
+            int cont = 0;
+            double first_value = 1687170643;
+            double last_value = 1687174238;
+            List<DataEntry> samples = new List<DataEntry>();
+
+            var dialog = new DialogWindow();
+
+            dialog.ShowDialog();
+            
+            if ((bool)dialog.DialogResult)
+            {
+                if (dialog.maxValueTextBox.Text == "" && dialog.minValueTextBox.Text == "")
+                {
+                    for (int i = 0; i < list_charts.Count; i++)
+                    {
+                        string image = CreateImageFromCartesianChart(folder_path, list_charts[i], i);
+                        list_images.Add(image);
+                    }
+                }
+
+                else
+                {
+                    while (dialog.maxValueTextBox.Text == "" || dialog.minValueTextBox.Text == "" 
+                        || Convert.ToDouble(dialog.minValueTextBox.Text) < first_value 
+                        || Convert.ToDouble(dialog.maxValueTextBox.Text) > last_value 
+                        || Convert.ToDouble(dialog.minValueTextBox.Text) > Convert.ToDouble(dialog.maxValueTextBox.Text) 
+                        || Convert.ToDouble(dialog.minValueTextBox.Text) == Convert.ToDouble(dialog.maxValueTextBox.Text))
+                    {
+                        MessageBox.Show("Invalid values, try again");
+                        var new_dialog = new DialogWindow();
+                        new_dialog.ShowDialog();
+                        if ((bool)new_dialog.DialogResult)
+                        {
+                            while (Convert.ToDouble(new_dialog.minValueTextBox.Text) < first_value 
+                                || Convert.ToDouble(new_dialog.maxValueTextBox.Text) > last_value 
+                                || Convert.ToDouble(new_dialog.minValueTextBox.Text) > Convert.ToDouble(new_dialog.maxValueTextBox.Text) 
+                                || new_dialog.maxValueTextBox.Text == "" || new_dialog.minValueTextBox.Text == "" 
+                                || Convert.ToDouble(new_dialog.maxValueTextBox.Text)== Convert.ToDouble(new_dialog.minValueTextBox.Text))
+                            {
+                                MessageBox.Show("Invalid values, try again");
+                                new_dialog.ShowDialog();
+                                
+                            }
+                            min_value = Convert.ToDouble(new_dialog.minValueTextBox.Text);
+                            max_value = Convert.ToDouble(dialog.maxValueTextBox.Text);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        cont++;
+                        break;
+                    }
+
+                    if(cont == 0)
+                    {
+                        min_value = Convert.ToDouble(dialog.minValueTextBox.Text);
+                        max_value = Convert.ToDouble(dialog.maxValueTextBox.Text);
+                    }
+
+                    RedrawChart(min_value, max_value);
+                }
+            }
+
+            else
+            {
+                return;
+            }
+
+            ExportImageToExcel(list_images);
+
+        }
+
+        // Convert Cartesian chart in png image
         private string CreateImageFromCartesianChart(string _folderPath, CartesianChart chart, int cont)
         {
-           
+            
             var chartControl = chart;
             var skChart = new SKCartesianChart(chartControl) { Width = 600, Height = 350, };
             skChart.SaveImage(Path.Combine(_folderPath, "chart" + cont + ".png"));
@@ -451,28 +695,88 @@ namespace Prova
             
         }
 
-        public void ExportImageToExcel(List<string> list_images, List<string> list_titles)
+        // Prepare, open and complete excel file with images of charts
+        private void ExportImageToExcel(List<string> list_images)
         {
             try
             {
+                var save = new SaveWindow();
 
-                string path = "C:\\Users\\lenovo\\Desktop\\prova.xls";
+                save.ShowDialog();
+
+                string name_file = save.save_name.Text;
+                
+                if ((bool)save.DialogResult)
+                {
+                    while (name_file.Length == 0)
+                    {
+                        MessageBox.Show("Enter a valid file name");
+                        var new_save = new SaveWindow();
+                        new_save.ShowDialog();
+                        if ((bool)new_save.DialogResult)
+                        {
+                            name_file = new_save.save_name.Text;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        
+                    }
+                }
+                else
+                {
+                    return;
+                }
+
+                string path = "C:\\Users\\lenovo\\Desktop\\" + name_file + ".xls";
+
+                while (File.Exists(path)){
+                    MessageBox.Show("A file with the same name already exists, change the name");
+                    var new_save = new SaveWindow();
+                    new_save.ShowDialog();
+                    if ((bool)new_save.DialogResult)
+                    {
+                        name_file = new_save.save_name.Text;
+                        while (name_file.Length == 0)
+                        {
+                            MessageBox.Show("Enter a valid file name");
+                            var new_save2 = new SaveWindow();
+                            new_save2.ShowDialog();
+                            if ((bool)new_save2.DialogResult)
+                            {
+                                name_file = new_save2.save_name.Text;
+                            }
+                            else
+                            {
+                                return;
+                            }
+
+                        }
+                        path = "C:\\Users\\lenovo\\Desktop\\" + name_file + ".xls";
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    
+                }
+
                 string sheet_name = "Chart";
-                Class1 excel = new Class1();
+                UseExcel excel = new UseExcel();
 
                 excel.OpenFile(path, true);
                 excel.AddSheet(sheet_name, true);
                 excel.SetSheet(sheet_name);
 
-                for(int i = 0; i < list_images.Count; i++)
+                for (int i = 0; i < list_images.Count; i++)
                 {
-                    excel.SetTitleIntoSheet(excel.GetSheet(sheet_name), list_titles[i], i);
                     excel.SetImageIntoSheet(excel.GetSheet(sheet_name), list_images[i], i);
                 }
 
-                excel.CloseFile();
-                
+                RemoveChartImages();
 
+                excel.CloseFile();
 
             }
 
@@ -483,10 +787,30 @@ namespace Prova
             }
         }
 
+        // Remove chart images from folder after creating excel file 
+        private void RemoveChartImages()
+        {
+            try
+            {
+                string path = "C:\\Users\\lenovo\\source\\repos\\HMIver2\\HMI\\bin\\Debug\\net6.0-windows\\";
+                string[] files = Directory.GetFiles(path, "*.png");
+                foreach (var file in files)
+                {
+                    File.Delete(file);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return;
+            }
+
+        }
 
         // Propagates the MouseWheel event to all the selected preview graphs
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
+            
             var sv = DocPanel.SelectedContent as ScrollViewer;
             if (sv.Tag.ToString() != "00") { return; }
             var panel = sv.Content as StackPanel;
@@ -498,12 +822,14 @@ namespace Prova
                 {
                     var btn = child as ToggleButton;
                     zoom = (bool)btn.IsChecked;
-                }  else if (zoom) //loop dispari (condizionale)
-                {   
+                }
+                else if (zoom) //loop dispari (condizionale)
+                {
                     var graph = child as CartesianChart;
                     var core = graph.CoreChart as CartesianChart<SkiaSharpDrawingContext>;
                     System.Windows.Point position = e.GetPosition(this);
                     core.Zoom(new LvcPoint((float)position.X, (float)position.Y), (e.Delta <= 0) ? ZoomDirection.ZoomOut : ZoomDirection.ZoomIn);
+                   
                 }
             }
         }

@@ -12,13 +12,11 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.Eventing.Reader;
 using System.Net.Http.Headers;
 using System.Windows.Media.Imaging;
-//using Microsoft.Office.Core;
 
 namespace ExcelClass
 {
-    public class Class1
+    public class UseExcel
     {
-        
 
         private string _filePath;
         private string _nameFile;
@@ -52,7 +50,7 @@ namespace ExcelClass
             }
         }
 
-        public Class1()
+        public UseExcel()
         {
              _xL = new Excel.Application();
             _book = _xL.Workbooks.Add();
@@ -91,7 +89,6 @@ namespace ExcelClass
             }
         }
 
-
         public void AddSheet(string name, bool first)
         {
             //active the sheet if it is the first, otherwise create a new sheet
@@ -107,7 +104,6 @@ namespace ExcelClass
             _sheet.Name = name;
         }
 
-        //makes the current sheet the active sheet.
         public void SetSheet(string name)
         {
             object missing = Type.Missing;
@@ -132,7 +128,6 @@ namespace ExcelClass
             string path_image = "C:\\Users\\lenovo\\source\\repos\\HMIver2\\HMI\\bin\\Debug\\net6.0-windows\\" + image;
             _sheet.Shapes.AddPicture(path_image, Microsoft.Office.Core.MsoTriState.msoFalse, Microsoft.Office.Core.MsoTriState.msoCTrue, 10, (350 * cont) + 30 , 600, 350);
         }
-        
 
         public void CloseFile()
         {
