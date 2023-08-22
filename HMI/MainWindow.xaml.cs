@@ -589,7 +589,7 @@ namespace Prova
                     ti.Add(new CloseableTab());
                     ti[i].Content = grids[i];
                     ti[i].Title = String.Format("Export Tab {0}", i + 1);
-                    ti[i].Tag = PREVIEW_TAB_ID;
+                    ti[i].Tag = EXPORT_TAB_ID;
                     svgraph[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheel);
                     svbtn[i].PreviewMouseWheel += new MouseWheelEventHandler(IgnoreWheel);
                     grids[i].Children.Add(svbtn[i]);
@@ -971,7 +971,7 @@ namespace Prova
         {
             // This event should only work inside of a Preview Tab.
             var selectedtab = TabControl.SelectedItem as TabItem;
-            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID) { return; }
+            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID || selectedtab.Tag.ToString() != EXPORT_TAB_ID) { return; }
             var grid = TabControl.SelectedContent as Grid;
             var svbtn = grid.Children[0] as ScrollViewer;
             var svgraph = grid.Children[1] as ScrollViewer;
