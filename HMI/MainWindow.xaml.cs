@@ -41,7 +41,7 @@ namespace Prova
         // Path to the input files.
         private static readonly string RunningPath = Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName;
         private static readonly string csvPath = string.Format("{0}resources\\FileDemo.csv", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
-        private static readonly string imagePath = "pack://application:,,,/resources/Rina2.bmp";
+        private static readonly string imagePath = "pack://application:,,,/resources/Rina_logo.bmp";
         // Declaration of "global" structures.
         private readonly Dictionary<string, List<DataEntry>> csvData = new();
         private readonly List<TreeViewItem> selectedItemList = new();
@@ -51,7 +51,7 @@ namespace Prova
         List<CartesianChart> list_charts = new List<CartesianChart>();
         List<string> list_images = new List<string>();
         List<string> list_titles = new List<string>();
-        string folder_path = @"C:\Users\lenovo\source\repos\HMIver2\HMI\bin\Debug\net6.0-windows";
+        string folder_path = @"D:\ProgramData\repos\HMI\HMI\bin\Debug\net6.0-windows";
 
         public MainWindow()
         {
@@ -70,7 +70,7 @@ namespace Prova
         {
             // Load the XML document.
             XmlDocument xDoc = new();
-            xDoc.Load(@"resources\albero_configurazione.xml");
+            xDoc.Load(@"resources\config_tree.xml");
             // Clear out the treeview.
             dirTree.Items.Clear();
             // Add the root node.
@@ -817,7 +817,7 @@ namespace Prova
                     return;
                 }
 
-                string path = "C:\\Users\\lenovo\\Desktop\\" + name_file + ".xls";
+                string path = "C:\\Users\\tisco\\Desktop\\" + name_file + ".xls";
 
                 while (File.Exists(path)){
                     MessageBox.Show("A file with the same name already exists, change the name");
@@ -841,7 +841,7 @@ namespace Prova
                             }
 
                         }
-                        path = "C:\\Users\\lenovo\\Desktop\\" + name_file + ".xls";
+                        path = "C:\\Users\\tisco\\Desktop\\" + name_file + ".xls";
                     }
                     else
                     {
