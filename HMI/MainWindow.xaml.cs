@@ -27,6 +27,8 @@ using System.Runtime.InteropServices;
 using Microsoft.Office.Interop.Excel;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Diagnostics.Eventing.Reader;
+using System.Diagnostics.Metrics;
+using System.Reflection;
 
 namespace Prova
 {
@@ -191,6 +193,7 @@ namespace Prova
             try
             {
                 int chartcounter = 0;
+                int counter = 0;
                 TabControl tab = TabControl;
                 List<Grid> grids = new();
                 List<StackPanel> graphpanel = new();
@@ -199,6 +202,20 @@ namespace Prova
                 List<ScrollViewer> svbtn = new();
                 List<CloseableTab> ti = new();
                 GenerateChartData();
+                foreach (ToggleButton mybutton in Wrap.Children)
+                {
+                    if ((bool)mybutton.IsChecked)
+                    {
+                        counter++;
+                    }
+                }
+                if (counter == 0)
+                {
+                    {
+                        MessageBox.Show("Select at least one system");
+                        return;
+                    }
+                };
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
@@ -389,7 +406,27 @@ namespace Prova
         {
             try
             {
-                if(list_charts.Count != 0)
+                int tabcounter = 0;
+                int counter = 0;
+                TabControl tab = TabControl;
+                List<StackPanel> panel = new();
+                List<ScrollViewer> sv = new();
+                List<CloseableTab> ti = new();
+                foreach (ToggleButton mybutton in Wrap.Children)
+                {
+                    if ((bool)mybutton.IsChecked)
+                    {
+                        counter++;
+                    }
+                }
+                if (counter == 0)
+                {
+                    {
+                        MessageBox.Show("Select at least one system");
+                        return;
+                    }
+                };
+                if (list_charts.Count != 0)
                 {
                     list_charts.Clear();
                 }
@@ -398,13 +435,6 @@ namespace Prova
                 {
                     list_images.Clear();
                 }
-
-                int tabcounter = 0;
-                TabControl tab = TabControl;
-                List<StackPanel> panel = new();
-                List<ScrollViewer> sv = new();
-                List<CloseableTab> ti = new();
-
                 foreach (ToggleButton mybutton in Wrap.Children)
                 {
                     if ((bool)mybutton.IsChecked)
