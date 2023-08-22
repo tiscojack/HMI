@@ -30,7 +30,7 @@ using System.Diagnostics.Eventing.Reader;
 
 namespace Prova
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         // "Global" constants.
         private const int TIMER_TICK_SECONDS = 1;
@@ -357,7 +357,7 @@ namespace Prova
                 // The chart gets updated live (when we zoom/pan) so if the demo is set to true, it looks buggy. 
                 demo = false;
                 // Sets the selected tab to the first of the newly inserted ones.
-                Dispatcher.BeginInvoke((Action)(() => tab.SelectedIndex = 1));
+                Dispatcher.BeginInvoke((System.Action)(() => tab.SelectedIndex = 1));
             }
             catch (Exception ex)
             {
@@ -1039,7 +1039,7 @@ namespace Prova
                             AddToWrapPanel(tvItem.Header, tvItem.Tag);
                         }
                     }
-                    Dispatcher.BeginInvoke((Action)(() => TabControl.SelectedItem = mainview));
+                    Dispatcher.BeginInvoke((System.Action)(() => TabControl.SelectedItem = mainview));
                 }
             }
         }
