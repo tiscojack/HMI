@@ -6,7 +6,6 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WPF;
-//using LiveChartsCore.SkiaSharpView.Maui;
 using LiveChartsCore.SkiaSharpView.SKCharts;
 using SkiaSharp;
 using System;
@@ -23,12 +22,6 @@ using System.Windows.Threading;
 using System.Xml;
 using Path = System.IO.Path;
 using ExcelClass;
-using System.Runtime.InteropServices;
-using Microsoft.Office.Interop.Excel;
-using Excel = Microsoft.Office.Interop.Excel;
-using System.Diagnostics.Eventing.Reader;
-using System.Diagnostics.Metrics;
-using System.Reflection;
 
 namespace Prova
 {
@@ -37,10 +30,11 @@ namespace Prova
         // "Global" constants.
         private const int TIMER_TICK_SECONDS = 1;
         private const int PREVIEW_GRAPH_HEIGHT = 150;
-        private const int EXPORT_GRAPH_HEIGHT = 400;
+        private const int EXPORT_GRAPH_HEIGHT = 200;
         private const int PREVIEW_BTN_HEIGHT = 35;
+        private const int EXPORT_BTN_HEIGHT = 20;
         private const int NUMBER_OF_CHARTS_IN_A_PREVIEW_TAB = 10;
-        private const int NUMBER_OF_CHARTS_IN_A_EXPORT_TAB = 6;
+        private const int NUMBER_OF_CHARTS_IN_AN_EXPORT_TAB = 10;
         private const string PREVIEW_TAB_ID = "00";
         private const string EXPORT_TAB_ID = "02";
         // Path to the input files.
@@ -55,8 +49,7 @@ namespace Prova
         private bool demo = false;
         List<CartesianChart> list_charts = new List<CartesianChart>();
         List<string> list_images = new List<string>();
-        List<string> list_titles = new List<string>();
-        string folder_path = @"D:\ProgramData\repos\HMI\HMI\bin\Debug\net6.0-windows";
+        string folder_path = @"C:\Users\lenovo\source\repos\HMIver2\HMI\bin\Debug\net6.0-windows";
 
         public MainWindow()
         {
@@ -387,9 +380,9 @@ namespace Prova
         }
         private void Svgraph_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            // This event should only work inside of a Preview Tab.
+            // This event should only work inside of a Preview Tab and Export Tab
             var selectedtab = TabControl.SelectedItem as TabItem;
-            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID) { return; }
+            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID && selectedtab.Tag.ToString() != EXPORT_TAB_ID) { return; }
             // Only looking for vertical scrolling, if there is none, return.
             if (e.VerticalChange == 0) { return; }
             var svgraph = sender as ScrollViewer;
@@ -398,6 +391,7 @@ namespace Prova
             // Moves the left scrollbar to the same offset of the right one.
             svbtn.ScrollToVerticalOffset(svgraph.VerticalOffset);
         }
+
         // Used to override the normal scrolling with mouse wheel.
         private void IgnoreWheel(object sender, MouseWheelEventArgs e)
         {
@@ -446,7 +440,10 @@ namespace Prova
                 {
                     if ((bool)mybutton.IsChecked)
                     {
+                        // Retrieve the data from the dictionary
                         List<DataEntry> samples = csvData[mybutton.ToolTip.ToString()[33..]];
+                        // Split data into two different lists, one for the UP records, one for the DOWN records,
+                        // in order to plot it with different colors
                         List<DataEntry> green = new();
                         List<DataEntry> red = new();
                         for (int i = 0; i < samples.Count; i++)
@@ -472,24 +469,28 @@ namespace Prova
                                 };
                             };
                         }
+
+                        // Maximum value that is gonna be plotted on the X axis, in seconds
                         double maxVal = samples.Last().get_unixtimestamp() - samples.First().get_unixtimestamp();
 
-
+                        // Plot the chart
                         CartesianChart grafico = new()
                         {
                             Width = 40000,
                             Height = EXPORT_GRAPH_HEIGHT,
+                            Margin = new Thickness(0, EXPORT_BTN_HEIGHT, 0, 0),
                             ZoomMode = ZoomAndPanMode.X,
+                            ZoomingSpeed = 0.1,
+                            TooltipFindingStrategy = TooltipFindingStrategy.CompareOnlyX,
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
                                 new StepLineSeries<DataEntry>()
                                 {
                                     Values = green,
-                                    Name = mybutton.ToolTip.ToString().Substring(33),
                                     Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 0 },
                                     Fill = new SolidColorPaint(SKColors.Green),
-                                    
+                                    Name = "UP",
                                     GeometrySize = 0,
                                     Mapping = (sample, chartPoint) =>
                                     {
@@ -503,7 +504,11 @@ namespace Prova
                                             _ => 6,
                                         };
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
-                                    }
+                                    },
+                                    XToolTipLabelFormatter =
+                                        (chartPoint) => $"{UnixTimeStampToDateTime(chartPoint.SecondaryValue + samples[0].get_unixtimestamp())}",
+                                    YToolTipLabelFormatter =
+                                        (chartPoint) => $""
                                 },
                                 new StepLineSeries<DataEntry>()
                                 {
@@ -511,6 +516,7 @@ namespace Prova
                                     Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 0 },
                                     Fill = new SolidColorPaint(SKColors.Red),
                                     GeometrySize = 0,
+                                    Name = "DOWN",
                                     Mapping = (sample, chartPoint) =>
                                     {
                                         chartPoint.PrimaryValue = sample.get_status1() switch
@@ -523,18 +529,20 @@ namespace Prova
                                             _ => 6,
                                         };
                                         chartPoint.SecondaryValue = sample.get_unixtimestamp() - samples[0].get_unixtimestamp();
-                                    }
+                                    },
+                                    XToolTipLabelFormatter =
+                                        (chartPoint) => $"{UnixTimeStampToDateTime(chartPoint.SecondaryValue + samples[0].get_unixtimestamp())}",
+                                    YToolTipLabelFormatter =
+                                        (chartPoint) => $"",
                                 }
                                 
                             },
-                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> 
-                            { 
-                                new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal}, },
-                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 15, MinLimit = 0, MaxLimit = 7, Labels = new string[] { "", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE", "", mybutton.ToolTip.ToString().Substring(33) }, }, }
+                            XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}", TextSize = 10, MinLimit = 0, MaxLimit = maxVal}, },
+                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 10, MinStep = 0.5, ForceStepToMin = true, MinLimit = 0, MaxLimit = 7, Labels = new string[] { "", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE", "", mybutton.ToolTip.ToString().Substring(33) }, }, },
                         };
 
-                        // Adds a new tab every 10 graphs. 
-                        if (chartcounter % NUMBER_OF_CHARTS_IN_A_EXPORT_TAB == 0)
+                        // Adds a new tab every 6 graphs 
+                        if (chartcounter % NUMBER_OF_CHARTS_IN_AN_EXPORT_TAB == 0)
                         {
                             // Each tab is composed by a grid, with two columns
                             Grid grid = new();
@@ -549,14 +557,14 @@ namespace Prova
                             grid.ColumnDefinitions.Add(c1);
                             grid.ColumnDefinitions.Add(c2);
                             grids.Add(grid);
-                            // The left column is a stackpanel where we will insert the buttons.
+                            // The left column is a stackpanel where we will insert the buttons
                             btnpanel.Add(new StackPanel() { Orientation = Orientation.Vertical });
                             svbtn.Add(new ScrollViewer()
                             {
                                 VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
                                 HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
                             });
-                            // The left column is a stackpanel where we will insert the graphs.
+                            // The right column is a stackpanel where we will insert the graphs
                             graphpanel.Add(new StackPanel() { Orientation = Orientation.Vertical });
                             svgraph.Add(new ScrollViewer()
                             {
@@ -565,18 +573,19 @@ namespace Prova
                                 Margin = new Thickness(10, 0, 0, 0)
                             });
                         }
-                        // Adds each graph into the right StackPanel.
-                        graphpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_EXPORT_TAB].Children.Add(grafico);
-                        // For every graph, also adds its ToggleButton in the left StackPanel.
-                        btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_A_EXPORT_TAB].Children.Add(new ToggleButton()
+                        // Adds each graph into the right StackPanel
+                        graphpanel[chartcounter / NUMBER_OF_CHARTS_IN_AN_EXPORT_TAB].Children.Add(grafico);
+                        // For every graph, also adds its ToggleButton in the left StackPanel
+                        btnpanel[chartcounter / NUMBER_OF_CHARTS_IN_AN_EXPORT_TAB].Children.Add(new ToggleButton()
                         {
                             Content = mybutton.ToolTip.ToString()[33..],
                             Margin = new Thickness(10, 0, 0, EXPORT_GRAPH_HEIGHT),
                             FontSize = 13,
                             Width = 100,
-                            Height = PREVIEW_BTN_HEIGHT,
+                            Height = EXPORT_BTN_HEIGHT,
                             HorizontalAlignment = HorizontalAlignment.Left,
                         });
+
                         // Attaches to the whole window the event handler that manages the zooming of charts.
                         this.AddHandler(UIElement.PreviewMouseWheelEvent, new MouseWheelEventHandler(ChartMouseWheelEvent), true);
                         list_charts.Add(grafico);
@@ -584,7 +593,7 @@ namespace Prova
                     }
                 }
                 // Iterates over the number of tabs to create.
-                for (int i = 0; i <= ((chartcounter - 1) / NUMBER_OF_CHARTS_IN_A_EXPORT_TAB); i++)
+                for (int i = 0; i <= ((chartcounter - 1) / NUMBER_OF_CHARTS_IN_AN_EXPORT_TAB); i++)
                 {
                     ti.Add(new CloseableTab());
                     ti[i].Content = grids[i];
@@ -599,7 +608,7 @@ namespace Prova
                     svgraph[i].Content = graphpanel[i];
                     svgraph[i].SetValue(Grid.ColumnProperty, 1);
                     tab.Items.Insert(i + 1, ti[i]);
-                    // Mimics the scrolling of the right panel to the left one.
+                    // Mimics the scrolling of the right panel to the left one
                     svgraph[i].ScrollChanged += new ScrollChangedEventHandler(Svgraph_ScrollChanged);
                 }
 
@@ -687,9 +696,10 @@ namespace Prova
 
                         CartesianChart grafico = new()
                         {
-                            Width = 60000,
-                            Height = 400,
+                            Width = 40000,
+                            Height = EXPORT_GRAPH_HEIGHT,
                             ZoomMode = ZoomAndPanMode.X,
+                            Margin = new Thickness(0, EXPORT_BTN_HEIGHT, 0, 0),
                             HorizontalAlignment = HorizontalAlignment.Left,
                             Series = new[]
                             {
@@ -698,7 +708,7 @@ namespace Prova
                                     Values = green,
                                     Stroke = new SolidColorPaint(SKColors.Green) { StrokeThickness = 0 },
                                     Fill = new SolidColorPaint(SKColors.Green),
-                                    
+                                    Name = "UP",
                                     GeometrySize = 0,
                                     Mapping = (sample, chartPoint) =>
                                     {
@@ -719,6 +729,7 @@ namespace Prova
                                     Values = red,
                                     Stroke = new SolidColorPaint(SKColors.Red) { StrokeThickness = 0 },
                                     Fill = new SolidColorPaint(SKColors.Red),
+                                    Name = "DOWN",
                                     GeometrySize = 0,
                                     Mapping = (sample, chartPoint) =>
                                     {
@@ -736,7 +747,7 @@ namespace Prova
                                 }
                             },
                             XAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { Labeler = (value) => $"{value}s", TextSize = 10, MinStep = step, ForceStepToMin = true, MinLimit = 0, MaxLimit = maxVal + step / 2 }, },
-                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 15, MinLimit = 0, MaxLimit = 7, Labels = new string[] { "", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE", "", mybutton.ToolTip.ToString().Substring(33)}, }, }
+                            YAxes = new List<LiveChartsCore.SkiaSharpView.Axis> { new LiveChartsCore.SkiaSharpView.Axis { TextSize = 10, MinStep = 0.5, ForceStepToMin = true, MinLimit = 0, MaxLimit = 7, Labels = new string[] { "", "FAILURE", "DEGRADED", "MAINTENANCE", "UNKNOWN", "OPERATIVE", "", mybutton.ToolTip.ToString().Substring(33)}, }, }
                         };
 
                         list_charts.Add(grafico);
@@ -888,7 +899,7 @@ namespace Prova
                     return;
                 }
 
-                string path = "C:\\Users\\tisco\\Desktop\\" + name_file + ".xls";
+                string path = "C:\\Users\\lenovo\\Desktop\\" + name_file + ".xls";
 
                 while (File.Exists(path)){
                     MessageBox.Show("A file with the same name already exists, change the name");
@@ -912,7 +923,7 @@ namespace Prova
                             }
 
                         }
-                        path = "C:\\Users\\tisco\\Desktop\\" + name_file + ".xls";
+                        path = "C:\\Users\\lenovo\\Desktop\\" + name_file + ".xls";
                     }
                     else
                     {
@@ -966,12 +977,12 @@ namespace Prova
             }
 
         }
-        // Propagates the MouseWheel event to all the selected preview graphs.
+        // Propagates the MouseWheel event to all the selected preview graphs and export graphs
         private void ChartMouseWheelEvent(object sender, MouseWheelEventArgs e)
         {
-            // This event should only work inside of a Preview Tab.
+            // This event should only work inside of a Preview Tab and a Export Tab
             var selectedtab = TabControl.SelectedItem as TabItem;
-            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID || selectedtab.Tag.ToString() != EXPORT_TAB_ID) { return; }
+            if (selectedtab.Tag.ToString() != PREVIEW_TAB_ID && selectedtab.Tag.ToString() != EXPORT_TAB_ID) { return; }
             var grid = TabControl.SelectedContent as Grid;
             var svbtn = grid.Children[0] as ScrollViewer;
             var svgraph = grid.Children[1] as ScrollViewer;
